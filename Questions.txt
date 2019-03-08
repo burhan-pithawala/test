@@ -1,0 +1,1298 @@
+Number of mappers in sqoop
+4 default mappers are present in sqoop
+If unique key is not present how can you load the data using sqoop?
+If your table has no primary key defined then you have to give -m 1 option for importing the data or you have to provide --split-by argument with some column name, otherwise it gives the error:  
+ERROR tool.ImportTool: Error during import: No primary key could be found for table <table_name>. Please specify one with --split-by or perform a sequential import with '-m 1'
+then your sqoop command will look like
+sqoop import \
+    --connect jdbc:mysql://localhost/test_db \
+    --username root \
+    --password **** \
+    --table user \
+    --target-dir /user/root/user_data \
+    --columns "first_name, last_name, created_date"
+    -m 1
+or
+sqoop import \
+    --connect jdbc:mysql://localhost/test_db 
+    --username root \
+    --password **** \
+    --table user \
+    --target-dir /user/root/user_data \
+    --columns "first_name, last_name, created_date"
+    --split-by created_date
+================
+What is vectorization?
+By default, the Hive query execution engine processes one row of a table at a time. The single row of data goes through all the operators in the query before the next row is processed, resulting in very inefficient CPU usage. In vectorized query execution, data rows are batched together and represented as a set of column vectors. The basic idea of vectorized query execution is to process a batch of rows as an array of column vectors.
+When query vectorization is enabled, the query engine processes vectors of columns, which greatly improves CPU utilization for typical query operations like scans, filters, aggregates, and joins.
+To enable query vectorization on an individual session only, use the Hive SET command:
+SET hive.vectorized.execution.enabled=true;
+Using the SET command to enabled query vectorization on a session basis is useful to test the effects of vectorization on execution for specific sets of queries.
+What is data sampling?
+http://myitlearnings.com/sampling-in-hive/
+http://myitlearnings.com/running-sampling-queries-in-hive/
+Difference Inputsplit and data block
+Block – HDFS Block is the physical representation of data in Hadoop.
+InputSplit – MapReduce InputSplit is the logical representation of data present in the block in Hadoop. It is basically used during data processing in MapReduce program or other processing techniques. The main thing to focus is that InputSplit doesn’t contain actual data; it is just a reference to the data.
+What transformations you worked on?
+Filter(),groupBy(),distinct(),map(),flatMap(),union().
+Can we specify number of mappers in mapreduce?
+In the code, one can configure JobConf variables.
+job.setNumMapTasks(5); // 5 mappers
+job.setNumReduceTasks(2); // 2 reducers
+Note that on Hadoop 2 (YARN), the mapred.map.tasks and mapred.reduce.tasks are deprecated and are replaced by other variables:
+mapred.map.tasks     -->	mapreduce.job.maps
+mapred.reduce.tasks  -->	mapreduce.job.reduces
+==========
+How to read xml file in hive
+https://stackoverflow.com/questions/50429315/read-xml-in-spark
+df = spark.read.format("com.databricks.spark.xml").option("rootTag", "hierarchy").option("rowTag", "att") .load("test.xml")
+How to read json file in hive
+Difference between map and flatmap
+Map transformation returns new rdd which is having equal number of elements as the source rdd.
+Flatmap transformation also provides the new rdd but it can have 0 or more number of elements in the rdd. It flattens the source rdd.
+Can we update data in hive?
+http://dwgeek.com/apache-hive-table-update-using-acid-transactions-and-examples.html/
+To update the table , it should be transactional table :
+CREATE TABLE hive_acid_demo (key int, value int)
+CLUSTERED BY(key) INTO 3 BUCKETS
+STORED AS ORC
+TBLPROPERTIES ('transactional'='true');
+Note that, you must bucket the table to use ACID transactions on the tables. You can’t set TBLPROPERTIES in CREATE TABLE syntax without bucketing it.
+You must set below properties at Hive level to enable ACID transaction on Hive:
+
+SET hive.support.concurrency=true;
+SET hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
+SET hive.enforce.bucketing=true;
+SET hive.exec.dynamic.partition.mode=nostrict;
+≠===================
+Why rdd is immutable?
+https://www.quora.com/Why-is-RDD-immutable-in-Spark
+Can we use persisted data after sometime say 6 months?
+≠========
+Can we drop a database with empty tables in hive?
+Use,
+DROP DATABASE database_name CASCADE;
+By default, the mode is RESTRICT which blocks the deletion of database if it holds tables.
+=========
+
+
+≠======================
+Cognizant
+Sqoop:
+Default num mapper
+Can we use Num mappers with split by?
+We can not use num mappers with split by.We can specify -m 1 , and import data serially. We can specify any interger column in split-by clause.
+Can we use string column in --split-by clause in sqoop?
+https://stackoverflow.com/questions/40032752/sqoop-import-split-by-column-data-type
+What is Sqoop CODGEN
+https://www.google.com/amp/s/themorningreports.wordpress.com/2018/07/14/sqoop-codegen-command-with-example/amp/
+===================
+What is Sqoop eval why do we use?
+Using eval tool, we can evaluate any type of SQL query. Let us take an example of selecting limited rows in the employee table of db database. The following command is used to evaluate the given example using SQL query.
+$ sqoop eval \ --connect jdbc:mysql://localhost/db \ --username root \ --query “SELECT * FROM employee LIMIT 3”
+we can use eval for insert statements too.
+========================
+Incremental data in sqoop?
+There are two types of incremental import : append and lastmodified.
+If the source table is having continuous new rows to import this table we can use incremental mode "append".
+sqoop import --connect jdbc:mysql://localhost:3306/ydb --table yloc --username root -P --check-column rank --incremental append --last-value 7
+If the existing rows of the source table are  getting updated , we can use lastmodified mode for importing these updated rows.
+sqoop import --connect jdbc:mysql://localhost:3306/ydb --table yloc --username root -P --check-column rDate --incremental lastmodified --last-value 2014-01-25 --target-dir yloc/loc
+Hive:
+How to drop an external table data along with metadata?
+Drop table table_name
+===============
+Hadoop remove data command?
+Hadoop fs -rm /hdfs_directory
+=============
+How to change delimiter from ',' to '|' without drop and create new table.
+
+ALTER TABLE table_name set serde 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' WITH SERDEPROPERTIES ('field.delim' = '|');
+=================
+File formats you have worked on?
+Parquet
+
+Default compression technique for Parquet.
+snappy
+
+Can we change the compression in parquet.
+Parquet is type of columnar?
+Why CDH and which versions??
+====================
+Why Parquet?
+Parquet is a column-based storage format for Hadoop.
+If your dataset has many columns, and your use case typically involves working with a subset of those columns rather than entire records, Parquet is optimized for that kind of work.
+Avro is a row-based storage format for Hadoop.
+If your use case typically scans or retrieves all of the fields in a row in each query, Avro is usually the best choice.
+=====================
+Partitioning and Bucketing implemented?
+https://stackoverflow.com/questions/43467790/when-should-we-go-for-partition-and-bucketing-in-hive
+======================
+To convert date format in hive
+select from_unixtime(unix_timestamp('2016/06/01','yyyy/MM/dd'),'yyyy-MM-dd') from table1; 
+=================
+Give me a scenario where we should go for Bucketing instead of partitioning?
+https://stackoverflow.com/questions/43467790/when-should-we-go-for-partition-and-bucketing-in-hive
+Have you implemented any UDF?
+Python:
+Languages?
+Diff bw list n tuple?
+List is mutable and tuple is immutable
+==≠==========
+Three mutable n three immutable objects in python?
+Mutable : list,set,dict
+Immutable : frozen set,tuple,int,float,str
+==============
+Difference between collect_set and collect_list
+Collect_set has only distinct values no duplicacy is present
+Collect_list can have duplicate values
+============
+SparkSQL:
+Q. How Application runs in spark?
+when you run a Spark application on a cluster:
+The user submits an application using spark-submit.
+spark-submit launches the driver program and invokes the main() method specified by the user.
+The driver program contacts the cluster manager to ask for resources to launch executors.
+The cluster manager launches executors on behalf of the driver program.
+The driver process runs through the user application. Based on the RDD actions and transformations in the program, the driver sends work to executors in the form of tasks.
+Tasks are run on executor processes to compute and save results.
+If the driver’s main() method exits or it calls SparkContext.stop(), it will terminate the executors and release resources from the cluster manager.
+What do you do in sparkSQL?
+=============
+Suppose i have to delete 10 records from a table them have to put 10 new records in the same table. How can you do that?
+======≠=
+What is lazy evaluation?
+Transformation doesn't start executing as soon as they are applied.If we perform some action on it then only the transformations are executed.
+https://www.npntraining.com/blog/lazy-evaluation-in-apache-spark/
+============
+What is slowly changing dimensions?
+https://www.datawarehouse4u.info/SCD-Slowly-Changing-Dimensions.html
+How to find the duplicate rows in a table without using distinct?
+Select * from (Select *,count() as cnt from table_name group by *) where cnt > 1
+Q. How to find the first three highest salary in every department?
+Select * from (Select Dept,salary,rank() over (partitioned by Dept ordered by salary desc) as rnk from dept_sal ) where rnk < 4
+Q. Create table emp
+Rename emp to emp1
+Drop emp1
+What will happen in case of lazy evaluation in sparkSql.. will it work or it will not work?
+===========
+Have you used SparkMLLib
+Aws?
+NoSql database?
+Give me two major difference between Hive and SparkSQL?
+1) We can run subqueries in sparksql, in Hive we could not.
+2) We can create external table using hive, whereas we can not create it using SparkSql.
+
+Coalesce and repartition
+By applying coalesce we can only  reduce the number of partitions.Shuffling doesn't happen in coalesce.
+By applying repartition we can either increase or decrease the number of partitions .The shuffle happens in reaprtition
+
+Difference between rank() and dense_rank()
+The difference between rank and denseRank is that denseRank leaves no gaps in ranking sequence when there are ties. That is, if you were ranking a competition using denseRank and had three people tie for second place, you would say that all three were in second place and that the next person came in third.
+Why only spark?why can't impala?
+What are window functions?
+What is the difference between orderBy() and sortBy() in spark?
+Difference between spark 1.6 and spark 2.1
+1) In spark 1.6, we used to create HiveContext and SQLContext
+Spark 2.1 :There is only SparkSession needs to be created ,HiveContext and SQLContext are included in SparkSession only.
+2) spark 1.6 : If we are inserting into a partitioned table , we used to write df.partitionBy('Col').insertInto(table_name)
+Spark 2.1 : There is no need to write partitionBy() in insert statement.
+
+How to join two dataframes?
+Df.join(df1,[df1.id1 ==df2.id2],how='full')
+What is the cluster size?
+76 nodes
+152 GB ram
+Vcores 31
+Cluster capacity kaise nikalte hai :
+No of nodes * no of vcores per node *  nodememory = cluster memory/capacity
+76 * 31 *152 = 282720 ÷ 1024 = 350TB
+==========================
+What are storage types in spark?
+How to store two copies of data in memory?
+What is secondary namenode?
+Secondary Namenode, by its name we assume that it as a backup node but its not. First let me give a brief about Namenode.
+Namenode holds the metadata for HDFS like Block information, size etc. This Information is stored in main memory as well as disk for persistence storage .
+The information is stored in 2 different files .They are
+Editlogs- It keeps track of each and every changes to HDFS.
+Fsimage- It stores the snapshot of the file system.
+Any changes done to HDFS gets noted in the edit logos the file size grows where as the size of fsimage remains same. This does not have any impact until we restart the server. When we restart the server the edit file logs are written into fsimage file and loaded into main memory which takes some time. If we restart the cluster after a long time there will be a vast down time since the edit log file would have grown. Secondary namenode would come into picture in rescue of this problem.
+Secondary Namenode simply gets edit logs from name node periodically and copies to fsimage. This new fsimage is copied back to namenode.Namenode now, this uses this new fsimage for next restart which reduces the startup time. It is a helper node to Namenode and to precise Secondary Namenode whole purpose is to have checkpoint in HDFS, which helps namenode to function effectively. Hence, It is also called as Checkpoint node.
+What is catalyst optimizer?
+How to load data using structtype..without mentioning schema Everytime?
+What happens at background while running a spark job? Have you check DAG and EVENTS?
+https://databricks.com/blog/2015/06/22/understanding-your-spark-application-through-visualization.html
+What is the difference between Hadoop and spark?
+If you have 24 nodes cluster, how many executors you can give
+How have you done performance tuning in hive?
+https://www.google.com/amp/s/data-flair.training/blogs/hive-optimization-techniques/amp/
+Control arguments in sqoop
+Diff between reduceByKey() and groupByKey()
+https://databricks.gitbooks.io/databricks-spark-knowledge-base/content/best_practices/prefer_reducebykey_over_groupbykey.html
+How to write rank function in spark
+Difference between cache() and persist()
+https://unraveldata.com/to-cache-or-not-to-cache/
+What are the types of transformations in spark?
+we can apply two type of RDD transformations: narrow transformation (e.g. map(), filter() etc.) and wide transformation (e.g. reduceByKey()). Narrow transformation does not require the shuffling of data across a partition, the narrow transformations will group into single stage while in wide transformation the data shuffles. Hence, Wide transformation results in stage boundaries.
+
+How to find maximum of salary in a employee table? 
+Say if some records are deleted from dept table how to get that department?
+How to check which process are running in Unix and how to kill them?
+How to create function in Python?
+How to calculate Dept wise salary using rdd in spark?
+How to load hive table in spark 2 without using select statement ?
+spark.table('table_name')
+How resources are allocated in spark?
+http://site.clairvoyantsoft.com/understanding-resource-allocation-configurations-spark-application/
+What is mapside join?
+https://www.google.com/amp/s/acadgild.com/blog/map-side-joins-in-hive/amp
+How will you handle skewed data?
+Can partitioning and bucketing column can be same?
+How to write partitioner in mapreduce?
+Extend HashPartition class.
+
+How to do indexing in hive?
+https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Indexing
+Can we do bucketing without partitioning in hive?
+Default file format in spark 2?
+Parquet.
+Read and write operation in hdfs?
+Can we utilize memory of edge node?
+
+====================================================================
+
+
+
+
+
+
+
+Top Apache Spark Interview Questions You Should Prepare In 2019
+Recommended by 29 users
+Top Apache Spark Interview Questions You Should Prepare In 2019
+
+Sandeep Dayananda
+Published on Jan 02,2019
+    0 Comments
+ 116K Views
+Bookmark
+Email Post
+2018 has been the year of Big Data – the year when big data and analytics made tremendous progress through innovative technologies, data-driven decision making and outcome-centric analytics. Worldwide revenues for big data and business analytics (BDA) will grow from $130.1 billion in 2016 to more than $203 billion in 2020 (source IDC). Prepare with these top Apache Spark Interview Questions to get an edge in the burgeoning Big Data market where global and local enterprises, big or small, are looking for a quality Big Data and Hadoop experts. Before moving ahead, you can check out this skill report which talks about the top technical skills to master in 2019.
+
+As a big data professional, it is essential to know the right buzzwords, learn the right technologies and prepare the right answers to commonly asked Spark interview questions. With questions and answers around Spark Core, Spark Streaming, Spark SQL, GraphX, MLlib among others, this blog is your gateway to your next Spark job.
+
+Apache Spark Interview Questions And Answers
+1. Compare Hadoop and Spark.
+We will compare Hadoop MapReduce and Spark based on the following aspects:
+
+Apache Spark vs. Hadoop
+ Feature Criteria	Apache Spark	Hadoop
+Speed	100 times faster than Hadoop	Decent speed
+Processing	Real-time & Batch processing	Batch processing only
+Difficulty	Easy because of high level modules	Tough to learn
+Recovery	Allows recovery of partitions	Fault-tolerant
+Interactivity	Has interactive modes	No interactive mode except Pig & Hive
+Table: Apache Spark versus Hadoop
+
+Let us understand the same using an interesting analogy.
+
+“Single cook cooking an entree is regular computing. Hadoop is multiple cooks cooking an entree into pieces and letting each cook her piece.
+Each cook has a separate stove and a food shelf. The first cook cooks the meat, the second cook cooks the sauce. This phase is called “Map”. A the end the main cook assembles the complete entree. This is called “Reduce”. For Hadoop, the cooks are not allowed to keep things on the stove between operations. Each time you make a particular operation, the cook puts results on the shelf. This slows things down.
+For Spark, the cooks are allowed to keep things on the stove between operations. This speeds things up. Finally, for Hadoop the recipes are written in a language which is illogical and hard to understand. For Spark, the recipes are nicely written.” – Stan Kladko, Galactic Exchange.io
+
+2. What is Apache Spark?
+Apache Spark is an open-source cluster computing framework for real-time processing.
+It has a thriving open-source community and is the most active Apache project at the moment.
+Spark provides an interface for programming entire clusters with implicit data parallelism and fault-tolerance.
+Apache Spark - Spark Interview Questions - EdurekaSpark is of the most successful projects in the Apache Software Foundation. Spark has clearly evolved as the market leader for Big Data processing. Many organizations run Spark on clusters with thousands of nodes. Today, Spark is being adopted by major players like Amazon, eBay, and Yahoo! 
+
+GET STARTED WITH SPARK
+
+3. Explain the key features of Apache Spark.
+The following are the key features of Apache Spark:
+
+Polyglot
+Speed
+Multiple Format Support
+Lazy Evaluation
+Real Time Computation
+Hadoop Integration
+Machine Learning
+Let us look at these features in detail:
+
+Polyglot: Spark provides high-level APIs in Java, Scala, Python and R. Spark code can be written in any of these four languages. It provides a shell in Scala and Python. The Scala shell can be accessed through ./bin/spark-shell and Python shell through ./bin/pyspark from the installed directory.
+
+Speed: Spark runs upto 100 times faster than Hadoop MapReduce for large-scale data processing. Spark is able to achieve this speed through controlled partitioning. It manages data using partitions that help parallelize distributed data processing with minimal network traffic.
+
+Multiple Formats: Spark supports multiple data sources such as Parquet, JSON, Hive and Cassandra. The Data Sources API provides a pluggable mechanism for accessing structured data though Spark SQL. Data sources can be more than just simple pipes that convert data and pull it into Spark.
+
+Lazy Evaluation: Apache Spark delays its evaluation till it is absolutely necessary. This is one of the key factors contributing to its speed. For transformations, Spark adds them to a DAG of computation and only when the driver requests some data, does this DAG actually gets executed.
+
+Real Time Computation: Spark’s computation is real-time and has less latency because of its in-memory computation. Spark is designed for massive scalability and the Spark team has documented users of the system running production clusters with thousands of nodes and supports several computational models.
+
+Hadoop Integration: Apache Spark provides smooth compatibility with Hadoop. This is a great boon for all the Big Data engineers who started their careers with Hadoop. Spark is a potential replacement for the MapReduce functions of Hadoop, while Spark has the ability to run on top of an existing Hadoop cluster using YARN for resource scheduling. 
+
+Machine Learning: Spark’s MLlib is the machine learning component which is handy when it comes to big data processing. It eradicates the need to use multiple tools, one for processing and one for machine learning. Spark provides data engineers and data scientists with a powerful, unified engine that is both fast and easy to use.
+
+trend Trending Courses in this category
+Apache Spark and Scala Certification Training
+5 (9350)
+24k Learners Enrolled Live Class
+Best Price
+ 18,695  21,995
+Similar Courses
+Big Data Hadoop Certification Training Apache Kafka Certification TrainingPython Spark Certification Training using PySpark
+4. What are the languages supported by Apache Spark and which is the most popular one?
+Apache Spark supports the following four languages: Scala, Java, Python and R. Among these languages, Scala and Python have interactive shells for Spark. The Scala shell can be accessed through ./bin/spark-shell and the Python shell through ./bin/pyspark. Scala is the most used among them because Spark is written in Scala and it is the most popularly used for Spark.
+
+5. What are benefits of Spark over MapReduce?
+Spark has the following benefits over MapReduce:
+
+Due to the availability of in-memory processing, Spark implements the processing around 10 to 100 times faster than Hadoop MapReduce whereas MapReduce makes use of persistence storage for any of the data processing tasks.
+Unlike Hadoop, Spark provides inbuilt libraries to perform multiple tasks from the same core like batch processing, Steaming, Machine learning, Interactive SQL queries. However, Hadoop only supports batch processing.
+Hadoop is highly disk-dependent whereas Spark promotes caching and in-memory data storage.
+Spark is capable of performing computations multiple times on the same dataset. This is called iterative computation while there is no iterative computing implemented by Hadoop.
+6. What is YARN?
+Similar to Hadoop, YARN is one of the key features in Spark, providing a central and resource management platform to deliver scalable operations across the cluster. YARN is a distributed container manager, like Mesos for example, whereas Spark is a data processing tool. Spark can run on YARN, the same way Hadoop Map Reduce can run on YARN. Running Spark on YARN necessitates a binary distribution of Spark as built on YARN support. 
+
+7. Do you need to install Spark on all nodes of YARN cluster?
+No, because Spark runs on top of YARN. Spark runs independently from its installation. Spark has some options to use YARN when dispatching jobs to the cluster, rather than its own built-in manager, or Mesos. Further, there are some configurations to run YARN. They include master, deploy-mode, driver-memory, executor-memory, executor-cores, and queue.
+
+8. Is there any benefit of learning MapReduce if Spark is better than MapReduce?
+Yes, MapReduce is a paradigm used by many big data tools including Spark as well. It is extremely relevant to use MapReduce when the data grows bigger and bigger. Most tools like Pig and Hive convert their queries into MapReduce phases to optimize them better.
+
+9. Explain the concept of Resilient Distributed Dataset (RDD).
+RDD stands for Resilient Distribution Datasets. An RDD is a fault-tolerant collection of operational elements that run in parallel. The partitioned data in RDD is immutable and distributed in nature. There are primarily two types of RDD:
+
+Parallelized Collections: Here, the existing RDDs running parallel with one another.
+Hadoop Datasets: They perform functions on each file record in HDFS or other storage systems.
+RDDs are basically parts of data that are stored in the memory distributed across many nodes. RDDs are lazily evaluated in Spark. This lazy evaluation is what contributes to Spark’s speed.
+
+10. How do we create RDDs in Spark?
+Spark provides two methods to create RDD:
+
+1. By parallelizing a collection in your Driver program.
+
+2. This makes use of SparkContext’s ‘parallelize’
+
+1
+2
+3
+method val DataArray = Array(2,4,6,8,10)
+ 
+val DataRDD = sc.parallelize(DataArray)
+3. By loading an external dataset from external storage like HDFS, HBase, shared file system.
+
+11. What is Executor Memory in a Spark application?
+Every spark application has same fixed heap size and fixed number of cores for a spark executor. The heap size is what referred to as the Spark executor memory which is controlled with the spark.executor.memory property of the –executor-memory flag. Every spark application will have one executor on each worker node. The executor memory is basically a measure on how much memory of the worker node will the application utilize.
+
+12. Define Partitions in Apache Spark.
+As the name suggests, partition is a smaller and logical division of data similar to ‘split’ in MapReduce. It is a logical chunk of a large distributed data set. Partitioning is the process to derive logical units of data to speed up the processing process. Spark manages data using partitions that help parallelize distributed data processing with minimal network traffic for sending data between executors. By default, Spark tries to read data into an RDD from the nodes that are close to it. Since Spark usually accesses distributed partitioned data, to optimize transformation operations it creates partitions to hold the data chunks. Everything in Spark is a partitioned RDD.
+
+13. What operations does RDD support?
+RDD (Resilient Distributed Dataset) is main logical data unit in Spark. An RDD has distributed a collection of objects. Distributed means, each RDD is divided into multiple partitions. Each of these partitions can reside in memory or stored on the disk of different machines in a cluster. RDDs are immutable (Read Only) data structure. You can’t change original RDD, but you can always transform it into different RDD with all changes you want.
+
+RDDs support two types of operations: transformations and actions. 
+
+Transformations: Transformations create new RDD from existing RDD like map, reduceByKey and filter we just saw. Transformations are executed on demand. That means they are computed lazily.
+
+Actions: Actions return final results of RDD computations. Actions triggers execution using lineage graph to load the data into original RDD, carry out all intermediate transformations and return final results to Driver program or write it out to file system.
+
+Apache Spark and Scala Certification Training
+14. What do you understand by Transformations in Spark?
+Transformations are functions applied on RDD, resulting into another RDD. It does not execute until an action occurs. map() and filter() are examples of transformations, where the former applies the function passed to it on each element of RDD and results into another RDD. The filter() creates a new RDD by selecting elements from current RDD that pass function argument.
+
+1
+2
+3
+val rawData=sc.textFile("path to/movies.txt")
+ 
+val moviesData=rawData.map(x=&gt;x.split("\t"))
+As we can see here, rawData RDD is transformed into moviesData RDD. Transformations are lazily evaluated.
+
+15. Define Actions in Spark.
+An action helps in bringing back the data from RDD to the local machine. An action’s execution is the result of all previously created transformations. Actions triggers execution using lineage graph to load the data into original RDD, carry out all intermediate transformations and return final results to Driver program or write it out to file system.
+
+reduce() is an action that implements the function passed again and again until one value if left. take() action takes all the values from RDD to a local node.
+
+1
+moviesData.saveAsTextFile(“MoviesData.txt”)
+As we can see here, moviesData RDD is saved into a text file called MoviesData.txt. 
+
+16. Define functions of SparkCore.
+Spark Core is the base engine for large-scale parallel and distributed data processing. The core is the distributed execution engine and the Java, Scala, and Python APIs offer a platform for distributed ETL application development. SparkCore performs various important functions like memory management, monitoring jobs, fault-tolerance, job scheduling and interaction with storage systems. Further, additional libraries, built atop the core allow diverse workloads for streaming, SQL, and machine learning. It is responsible for:
+
+Memory management and fault recovery
+Scheduling, distributing and monitoring jobs on a cluster
+Interacting with storage systems
+17. What do you understand by Pair RDD?
+Apache defines PairRDD functions class as
+
+1
+class PairRDDFunctions[K, V] extends Logging with HadoopMapReduceUtil with Serializable
+Special operations can be performed on RDDs in Spark using key/value pairs and such RDDs are referred to as Pair RDDs. Pair RDDs allow users to access each key in parallel. They have a reduceByKey() method that collects data based on each key and a join() method that combines different RDDs together, based on the elements having the same key.
+
+18. Name the components of Spark Ecosystem.
+Spark Core: Base engine for large-scale parallel and distributed data processing
+Spark Streaming: Used for processing real-time streaming data
+Spark SQL: Integrates relational processing with Spark’s functional programming API
+GraphX: Graphs and graph-parallel computation
+MLlib: Performs machine learning in Apache Spark
+19. How is Streaming implemented in Spark? Explain with examples.
+Spark Streaming is used for processing real-time streaming data. Thus it is a useful addition to the core Spark API. It enables high-throughput and fault-tolerant stream processing of live data streams. The fundamental stream unit is DStream which is basically a series of RDDs (Resilient Distributed Datasets) to process the real-time data. The data from different sources like Flume, HDFS is streamed and finally processed to file systems, live dashboards and databases. It is similar to batch processing as the input data is divided into streams like batches.
+
+Spark Streaming - Spark Tutorial - Edureka
+
+Figure: Spark Interview Questions – Spark Streaming
+
+20. Is there an API for implementing graphs in Spark?
+GraphX is the Spark API for graphs and graph-parallel computation. Thus, it extends the Spark RDD with a Resilient Distributed Property Graph.
+
+The property graph is a directed multi-graph which can have multiple edges in parallel. Every edge and vertex have user defined properties associated with it. Here, the parallel edges allow multiple relationships between the same vertices. At a high-level, GraphX extends the Spark RDD abstraction by introducing the Resilient Distributed Property Graph: a directed multigraph with properties attached to each vertex and edge.
+
+To support graph computation, GraphX exposes a set of fundamental operators (e.g., subgraph, joinVertices, and mapReduceTriplets) as well as an optimized variant of the Pregel API. In addition, GraphX includes a growing collection of graph algorithms and builders to simplify graph analytics tasks.
+
+21. What is PageRank in GraphX?
+PageRank measures the importance of each vertex in a graph, assuming an edge from u to v represents an endorsement of v’s importance by u. For example, if a Twitter user is followed by many others, the user will be ranked highly.
+
+GraphX comes with static and dynamic implementations of PageRank as methods on the PageRank Object. Static PageRank runs for a fixed number of iterations, while dynamic PageRank runs until the ranks converge (i.e., stop changing by more than a specified tolerance). GraphOps allows calling these algorithms directly as methods on Graph.
+
+LEARN SPARK FROM EXPERTS
+
+22. How is machine learning implemented in Spark?
+MLlib is scalable machine learning library provided by Spark. It aims at making machine learning easy and scalable with common learning algorithms and use cases like clustering, regression filtering, dimensional reduction, and alike.
+
+Machine Learning - Spark Interview Questions - Edureka
+
+23. Is there a module to implement SQL in Spark? How does it work?
+Spark SQL is a new module in Spark which integrates relational processing with Spark’s functional programming API. It supports querying data either via SQL or via the Hive Query Language. For those of you familiar with RDBMS, Spark SQL will be an easy transition from your earlier tools where you can extend the boundaries of traditional relational data processing. 
+
+Spark SQL integrates relational processing with Spark’s functional programming. Further, it provides support for various data sources and makes it possible to weave SQL queries with code transformations thus resulting in a very powerful tool.
+
+The following are the four libraries of Spark SQL.
+
+Data Source API
+DataFrame API
+Interpreter & Optimizer
+SQL Service
+Spark SQL - Spark Interview Questions - Edureka24. What is a Parquet file?
+Parquet is a columnar format file supported by many other data processing systems. Spark SQL performs both read and write operations with Parquet file and consider it be one of the best big data analytics formats so far. 
+
+Parquet is a columnar format, supported by many data processing systems. The advantages of having a columnar storage are as follows:
+
+Columnar storage limits IO operations.
+It can fetch specific columns that you need to access.
+Columnar storage consumes less space.
+It gives better-summarized data and follows type-specific encoding.
+25. How can Apache Spark be used alongside Hadoop?
+The best part of Apache Spark is its compatibility with Hadoop. As a result, this makes for a very powerful combination of technologies. Here, we will be looking at how Spark can benefit from the best of Hadoop. Using Spark and Hadoop together helps us to leverage Spark’s processing to utilize the best of Hadoop’s HDFS and YARN. 
+
+Figure: Using Spark and Hadoop
+
+Hadoop components can be used alongside Spark in the following ways:
+
+HDFS: Spark can run on top of HDFS to leverage the distributed replicated storage.
+MapReduce: Spark can be used along with MapReduce in the same Hadoop cluster or separately as a processing framework.
+YARN: Spark applications can also be run on YARN (Hadoop NextGen).
+Batch & Real Time Processing: MapReduce and Spark are used together where MapReduce is used for batch processing and Spark for real-time processing.
+26. What is RDD Lineage?
+Spark does not support data replication in the memory and thus, if any data is lost, it is rebuild using RDD lineage. RDD lineage is a process that reconstructs lost data partitions. The best is that RDD always remembers how to build from other datasets.
+
+27. What is Spark Driver?
+Spark Driver is the program that runs on the master node of the machine and declares transformations and actions on data RDDs. In simple terms, a driver in Spark creates SparkContext, connected to a given Spark Master.
+The driver also delivers the RDD graphs to Master, where the standalone cluster manager runs.
+
+Apache Spark and Scala Certification Training
+28. What file systems does Spark support?
+The following three file systems are supported by Spark:
+
+Hadoop Distributed File System (HDFS).
+Local File system.
+Amazon S3
+29. List the functions of Spark SQL.
+Spark SQL is capable of:
+
+Loading data from a variety of structured sources.
+Querying data using SQL statements, both inside a Spark program and from external tools that connect to Spark SQL through standard database connectors (JDBC/ODBC). For instance, using business intelligence tools like Tableau. 
+Providing rich integration between SQL and regular Python/Java/Scala code, including the ability to join RDDs and SQL tables, expose custom functions in SQL, and more.
+30. What is Spark Executor?
+When SparkContext connects to a cluster manager, it acquires an Executor on nodes in the cluster. Executors are Spark processes that run computations and store the data on the worker node. The final tasks by SparkContext are transferred to executors for their execution.
+
+31. Name types of Cluster Managers in Spark.
+The Spark framework supports three major types of Cluster Managers:
+
+Standalone: A basic manager to set up a cluster.
+Apache Mesos: Generalized/commonly-used cluster manager, also runs Hadoop MapReduce and other applications.
+YARN: Responsible for resource management in Hadoop.
+32. What do you understand by worker node?
+Worker node refers to any node that can run the application code in a cluster. The driver program must listen for and accept incoming connections from its executors and must be network addressable from the worker nodes. 
+
+Worker node is basically the slave node. Master node assigns work and worker node actually performs the assigned tasks. Worker nodes process the data stored on the node and report the resources to the master. Based on the resource availability, the master schedule tasks.
+
+33. Illustrate some demerits of using Spark.
+The following are some of the demerits of using Apache Spark:
+
+Since Spark utilizes more storage space compared to Hadoop and MapReduce, there may arise certain problems.
+Developers need to be careful while running their applications in Spark.
+Instead of running everything on a single node, the work must be distributed over multiple clusters.
+Spark’s “in-memory” capability can become a bottleneck when it comes to cost-efficient processing of big data.
+Spark consumes a huge amount of data when compared to Hadoop.
+34. List some use cases where Spark outperforms Hadoop in processing.
+Sensor Data Processing: Apache Spark’s “In-memory” computing works best here, as data is retrieved and combined from different sources.
+Real Time Processing: Spark is preferred over Hadoop for real-time querying of data. e.g. Stock Market Analysis, Banking, Healthcare, Telecommunications, etc.
+Stream Processing: For processing logs and detecting frauds in live streams for alerts, Apache Spark is the best solution.
+Big Data Processing: Spark runs upto 100 times faster than Hadoop when it comes to processing medium and large-sized datasets.
+35. What is a Sparse Vector?
+A sparse vector has two parallel arrays; one for indices and the other for values. These vectors are used for storing non-zero entries to save space.
+
+1
+Vectors.sparse(7,Array(0,1,2,3,4,5,6),Array(1650d,50000d,800d,3.0,3.0,2009,95054))
+The above sparse vector can be used instead of dense vectors.
+
+1
+val myHouse = Vectors.dense(4450d,2600000d,4000d,4.0,4.0,1978.0,95070d,1.0,1.0,1.0,0.0)
+36. Can you use Spark to access and analyze data stored in Cassandra databases?
+Yes, it is possible if you use Spark Cassandra Connector.To connect Spark to a Cassandra cluster, a Cassandra Connector will need to be added to the Spark project. In the setup, a Spark executor will talk to a local Cassandra node and will only query for local data. It makes queries faster by reducing the usage of the network to send data between Spark executors (to process data) and Cassandra nodes (where data lives).
+
+37. Is it possible to run Apache Spark on Apache Mesos?
+Yes, Apache Spark can be run on the hardware clusters managed by Mesos. In a standalone cluster deployment, the cluster manager in the below diagram is a Spark master instance. When using Mesos, the Mesos master replaces the Spark master as the cluster manager. Mesos determines what machines handle what tasks. Because it takes into account other frameworks when scheduling these many short-lived tasks, multiple frameworks can coexist on the same cluster without resorting to a static partitioning of resources.
+
+38. How can Spark be connected to Apache Mesos?
+To connect Spark with Mesos:
+
+Configure the spark driver program to connect to Mesos.
+Spark binary package should be in a location accessible by Mesos.
+Install Apache Spark in the same location as that of Apache Mesos and configure the property ‘spark.mesos.executor.home’ to point to the location where it is installed.
+39. How can you minimize data transfers when working with Spark?
+Minimizing data transfers and avoiding shuffling helps write spark programs that run in a fast and reliable manner. The various ways in which data transfers can be minimized when working with Apache Spark are:
+
+Using Broadcast Variable- Broadcast variable enhances the efficiency of joins between small and large RDDs.
+Using Accumulators – Accumulators help update the values of variables in parallel while executing.
+The most common way is to avoid operations ByKey, repartition or any other operations which trigger shuffles.
+
+trend Trending Courses in this category
+Apache Spark and Scala Certification Training
+5 (9350)
+24k Learners Enrolled Live Class
+Best Price
+ 18,695  21,995
+Similar Courses
+Big Data Hadoop Certification Training Apache Kafka Certification TrainingPython Spark Certification Training using PySpark
+40. What are broadcast variables?
+Broadcast variables allow the programmer to keep a read-only variable cached on each machine rather than shipping a copy of it with tasks. They can be used to give every node a copy of a large input dataset in an efficient manner. Spark also attempts to distribute broadcast variables using efficient broadcast algorithms to reduce communication cost.
+
+Broadcast Variables - Spark Interview Questions - Edureka41. Explain accumulators in Apache Spark.
+Accumulators are variables that are only added through an associative and commutative operation. They are used to implement counters or sums. Tracking accumulators in the UI can be useful for understanding the progress of running stages. Spark natively supports numeric accumulators. We can create named or unnamed accumulators.
+
+Accumulators - Spark Interview Questions - Edureka
+
+42. Why is there a need for broadcast variables when working with Apache Spark?
+Broadcast variables are read only variables, present in-memory cache on every machine. When working with Spark, usage of broadcast variables eliminates the necessity to ship copies of a variable for every task, so data can be processed faster. Broadcast variables help in storing a lookup table inside the memory which enhances the retrieval efficiency when compared to an RDD lookup().
+
+LEARN SPARK FROM EXPERTS
+
+43. How can you trigger automatic clean-ups in Spark to handle accumulated metadata?
+You can trigger the clean-ups by setting the parameter ‘spark.cleaner.ttl’ or by dividing the long running jobs into different batches and writing the intermediary results to the disk.
+
+44. What is the significance of Sliding Window operation?
+Sliding Window controls transmission of data packets between various computer networks. Spark Streaming library provides windowed computations where the transformations on RDDs are applied over a sliding window of data. Whenever the window slides, the RDDs that fall within the particular window are combined and operated upon to produce new RDDs of the windowed DStream.
+
+DStream Sliding Window - Spark Interview Questions - Edureka45. What is a DStream in Apache Spark?
+Discretized Stream (DStream) is the basic abstraction provided by Spark Streaming. It is a continuous stream of data. It is received from a data source or from a processed data stream generated by transforming the input stream. Internally, a DStream is represented by a continuous series of RDDs and each RDD contains data from a certain interval. Any operation applied on a DStream translates to operations on the underlying RDDs.
+
+DStreams can be created from various sources like Apache Kafka, HDFS, and Apache Flume. DStreams have two operations:
+
+Transformations that produce a new DStream.
+Output operations that write data to an external system.
+There are many DStream transformations possible in Spark Streaming. Let us look at filter(func). filter(func) returns a new DStream by selecting only the records of the source DStream on which func returns true.
+
+DStream Filter - Spark Interview Questions - Edureka46. Explain Caching in Spark Streaming.
+DStreams allow developers to cache/ persist the stream’s data in memory. This is useful if the data in the DStream will be computed multiple times. This can be done using the persist() method on a DStream. For input streams that receive data over the network (such as Kafka, Flume, Sockets, etc.), the default persistence level is set to replicate the data to two nodes for fault-tolerance.
+
+Caching - Spark Interview Questions - Edureka
+
+47. When running Spark applications, is it necessary to install Spark on all the nodes of YARN cluster?
+Spark need not be installed when running a job under YARN or Mesos because Spark can execute on top of YARN or Mesos clusters without affecting any change to the cluster.
+
+48. What are the various data sources available in Spark SQL?
+Parquet file, JSON datasets and Hive tables are the data sources available in Spark SQL.
+
+49. What are the various levels of persistence in Apache Spark?
+Apache Spark automatically persists the intermediary data from various shuffle operations, however, it is often suggested that users call persist () method on the RDD in case they plan to reuse it. Spark has various persistence levels to store the RDDs on disk or in memory or as a combination of both with different replication levels.
+
+The various storage/persistence levels in Spark are: 
+
+MEMORY_ONLY: Store RDD as deserialized Java objects in the JVM. If the RDD does not fit in memory, some partitions will not be cached and will be recomputed on the fly each time they’re needed. This is the default level.
+MEMORY_AND_DISK: Store RDD as deserialized Java objects in the JVM. If the RDD does not fit in memory, store the partitions that don’t fit on disk, and read them from there when they’re needed.
+MEMORY_ONLY_SER: Store RDD as serialized Java objects (one byte array per partition).
+MEMORY_AND_DISK_SER: Similar to MEMORY_ONLY_SER, but spill partitions that don’t fit in memory to disk instead of recomputing them on the fly each time they’re needed.
+DISK_ONLY: Store the RDD partitions only on disk.
+OFF_HEAP: Similar to MEMORY_ONLY_SER, but store the data in off-heap memory.
+50. Does Apache Spark provide checkpoints?
+Checkpoints are similar to checkpoints in gaming. They make it run 24/7 and make it resilient to failures unrelated to the application logic.
+
+Checkpoints - Spark Interview Questions - EdurekaFigure: Spark Interview Questions – Checkpoints
+
+Lineage graphs are always useful to recover RDDs from a failure but this is generally time-consuming if the RDDs have long lineage chains. Spark has an API for checkpointing i.e. a REPLICATE flag to persist. However, the decision on which data to checkpoint – is decided by the user. Checkpoints are useful when the lineage graphs are long and have wide dependencies.
+
+51. How Spark uses Akka?
+Spark uses Akka basically for scheduling. All the workers request for a task to master after registering. The master just assigns the task. Here Spark uses Akka for messaging between the workers and masters.
+
+Apache Spark and Scala Certification Training
+52. What do you understand by Lazy Evaluation?
+Spark is intellectual in the manner in which it operates on data. When you tell Spark to operate on a given dataset, it heeds the instructions and makes a note of it, so that it does not forget – but it does nothing, unless asked for the final result. When a transformation like map() is called on an RDD, the operation is not performed immediately. Transformations in Spark are not evaluated till you perform an action. This helps optimize the overall data processing workflow.
+
+Lazy Evaluation - Spark Interview Questions - Edureka53. What do you understand by SchemaRDD in Apache Spark RDD?
+SchemaRDD is an RDD that consists of row objects (wrappers around the basic string or integer arrays) with schema information about the type of data in each column. 
+
+SchemaRDD was designed as an attempt to make life easier for developers in their daily routines of code debugging and unit testing on SparkSQL core module. The idea can boil down to describing the data structures inside RDD using a formal description similar to the relational database schema. On top of all basic functions provided by common RDD APIs, SchemaRDD also provides some straightforward relational query interface functions that are realized through SparkSQL. 
+
+Now, it is officially renamed to DataFrame API on Spark’s latest trunk.
+
+54. How is Spark SQL different from HQL and SQL?
+Spark SQL is a special component on the Spark Core engine that supports SQL and Hive Query Language without changing any syntax. It is possible to join SQL table and HQL table to Spark SQL.
+
+55. Explain a scenario where you will be using Spark Streaming.
+When it comes to Spark Streaming, the data is streamed in real-time onto our Spark program.
+
+Twitter Sentiment Analysis is a real-life use case of Spark Streaming. Trending Topics can be used to create campaigns and attract a larger audience. It helps in crisis management, service adjusting and target marketing.
+
+Sentiment refers to the emotion behind a social media mention online. Sentiment Analysis is categorizing the tweets related to a particular topic and performing data mining using Sentiment Automation Analytics Tools.
+
+Spark Streaming can be used to gather live tweets from around the world into the Spark program. This stream can be filtered using Spark SQL and then we can filter tweets based on the sentiment. The filtering logic will be implemented using MLlib where we can learn from the emotions of the public and change our filtering scale accordingly.
+
+Twitter Use Case - Spark Interview Questions - Edureka
+
+The above figure displays the sentiments for the tweets containing the word ‘Trump’.
+
+====================================
+HIVE
+===================================
+
+Top Hadoop Interview Questions To Prepare In 2019 – Apache Hive
+Recommended by 190 users
+Top Hadoop Interview Questions To Prepare In 2019 – Apache Hive
+
+Ashish Bakshi
+Published on Jan 02,2019
+    8 Comments
+ 56.2K Views
+Bookmark
+Email Post
+Looking out for Apache Hive Interview Questions that are frequently asked by employers? Here is the blog on Apache Hive interview questions in Hadoop Interview Questions series. I hope you must not have missed the earlier blogs of our Hadoop Interview Question series.
+
+After going through this Apache Hive interview questions blog, you will get an in-depth knowledge of questions that are frequently asked by employers in Hadoop interviews related to Apache Hive. To learn each and every nuance of Hive & Hadoop Framework you can take a look at our Hadoop online course.
+
+In case you have attended any Hadoop interview previously, we encourage you to add the Apache Hive questions which you came across here in the comments tab. We will be happy to answer them, and spread the word to the community of fellow job seekers.
+
+Apache Hive – A Brief Introduction
+Apache Hive is a data warehouse system built on top of Hadoop and is used for analyzing structured and semi-structured data. It provides a mechanism to project structure onto the data and perform queries written in HQL (Hive Query Language) that are similar to SQL statements. Internally, these queries or HQL gets converted to map reduce jobs by the Hive compiler.
+
+Apache Hive Job Trends:
+Today, many companies consider Apache Hive as a de facto to perform analytics on large data sets. Also, since it supports SQL like query statements, it is very much popular among people who are from a non – programming background and wish to take advantage of Hadoop MapReduce framework.
+
+Now, let us have a look at the rising Apache Hive job trends over the past few years:Apache Hive Job Trends - Apache Hive Interview Questions - Edureka
+
+Source: indeed.com
+
+The above image clearly shows the vast demand for Apache Hive professionals in the industry. Therefore, it is high time to prepare yourself and seize this very opportunity. 
+
+I would suggest you to go through a dedicated blog on Apache Hive Tutorial to revise your concepts before proceeding in this Apache Hive Interview Questions blog.
+
+Big Data Hadoop Certification Training
+Apache Hive Interview Questions
+Here is the comprehensive list of the most frequently asked Apache Hive Interview Questions that have been framed after deep research and discussion with the industry experts.  
+
+1. Define the difference between Hive and HBase?
+Hive vs HBase
+HBase	Hive
+1. HBase is built on the top of HDFS	1. It is a data warehousing infrastructure
+2. HBase operations run in a real-time on its database rather	2. Hive queries are executed as MapReduce jobs internally
+3. Provides low latency to single rows from huge datasets	3. Provides high latency for huge datasets
+4. Provides random access to data	4. Provides random access to data
+2. What kind of applications is supported by Apache Hive?
+Hive supports all those client applications that are written in:
+
+Java
+PHP
+Python
+C++
+Ruby
+by exposing its Thrift server.
+
+3. Where does the data of a Hive table gets stored?
+By default, the Hive table is stored in an HDFS directory – /user/hive/warehouse. One can change it by specifying the desired directory in hive.metastore.warehouse.dir configuration parameter present in the hive-site.xml. 
+
+4. What is a metastore in Hive?
+Metastore in Hive stores the meta data information using RDBMS and an open source ORM (Object Relational Model) layer called Data Nucleus which converts the object representation into relational schema and vice versa.
+
+5. Why Hive does not store metadata information in HDFS?
+Hive stores metadata information in the metastore using RDBMS instead of HDFS. The reason for choosing RDBMS is to achieve low latency as HDFS read/write operations are time consuming processes.
+
+6. What is the difference between local and remote metastore?
+Local Metastore:
+
+In local metastore configuration, the metastore service runs in the same JVM in which the Hive service is running and connects to a database running in a separate JVM, either on the same machine or on a remote machine.
+
+Remote Metastore:
+
+In the remote metastore configuration, the metastore service runs on its own separate JVM and not in the Hive service JVM. Other processes communicate with the metastore server using Thrift Network APIs. You can have one or more metastore servers in this case to provide more availability.
+
+7. What is the default database provided by Apache Hive for metastore?
+By default, Hive provides an embedded Derby database instance backed by the local disk for the metastore. This is called the embedded metastore configuration.
+
+8. Scenario: 
+Suppose I have installed Apache Hive on top of my Hadoop cluster using default metastore configuration. Then, what will happen if we have multiple clients trying to access Hive at the same time? 
+
+The default metastore configuration allows only one Hive session to be opened at a time for accessing the metastore. Therefore, if multiple clients try to access the metastore at the same time, they will get an error. One has to use a standalone metastore, i.e. Local or remote metastore configuration in Apache Hive for allowing access to multiple clients concurrently. 
+
+Following are the steps to configure MySQL database as the local metastore in Apache Hive:
+
+One should make the following changes in hive-site.xml:
+javax.jdo.option.ConnectionURL property should be set to jdbc:mysql://host/dbname?createDataba
+seIfNotExist=true.
+javax.jdo.option.ConnectionDriverName property should be set to com.mysql.jdbc.Driver.
+One should also set the username and password as:
+javax.jdo.option.ConnectionUserName is set to desired username.
+javax.jdo.option.ConnectionPassword is set to the desired password.
+The JDBC driver JAR file for MySQL must be on the Hive’s classpath, i.e. The jar file should be copied into the Hive’s lib directory.
+Now, after restarting the Hive shell, it will automatically connect to the MySQL database which is running as a standalone metastore.
+9. What is the difference between external table and managed table?
+Here is the key difference between an external table and managed table:
+
+In case of managed table, If one drops a managed table, the metadata information along with the table data is deleted from the Hive warehouse directory.
+On the contrary, in case of an external table, Hive just deletes the metadata information regarding the table and leaves the table data present in HDFS untouched. 
+Note: I would suggest you to go through the blog on Hive Tutorial to learn more about Managed Table and External Table in Hive.
+
+10. Is it possible to change the default location of a managed table? 
+Yes, it is possible to change the default location of a managed table. It can be achieved by using the clause – LOCATION ‘<hdfs_path>’.
+
+trend Trending Courses in this category
+Big Data Hadoop Certification Training
+5 (57450)
+144k Learners Enrolled Live Class
+Best Price
+ 16,995  19,995
+Similar Courses
+Apache Spark and Scala Certification TrainingApache Kafka Certification TrainingPython Spark Certification Training using PySpark
+11. When should we use SORT BY instead of ORDER BY?
+We should use SORT BY instead of ORDER BY when we have to sort huge datasets because SORT BY clause sorts the data using multiple reducers whereas ORDER BY sorts all of the data together using a single reducer. Therefore, using ORDER BY against a large number of inputs will take a lot of time to execute. 
+
+12. What is a partition in Hive?
+Hive organizes tables into partitions for grouping similar type of data together based on a column or partition key. Each Table can have one or more partition keys to identify a particular partition. Physically, a partition is nothing but a sub-directory in the table directory.
+
+13. Why do we perform partitioning in Hive?
+Partitioning provides granularity in a Hive table and therefore, reduces the query latency by scanning only relevant partitioned data instead of the whole data set.
+
+For example, we can partition a transaction log of an e – commerce website based on month like Jan, February, etc. So, any analytics regarding a particular month, say Jan, will have to scan the Jan partition (sub – directory) only instead of the whole table data.
+
+14. What is dynamic partitioning and when is it used?
+In dynamic partitioning values for partition columns are known in the runtime, i.e. It is known during loading of the data into a Hive table. 
+
+One may use dynamic partition in following two cases:
+
+Loading data from an existing non-partitioned table to improve the sampling and therefore, decrease the query latency. 
+When one does not know all the values of the partitions before hand and therefore, finding these partition values manually from a huge data sets is a tedious task. 
+15. Scenario:
+Suppose, I create a table that contains details of all the transactions done by the customers of year 2016: CREATE TABLE transaction_details (cust_id INT, amount FLOAT, month STRING, country STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ‘,’ ;
+
+Now, after inserting 50,000 tuples in this table, I want to know the total revenue generated for each month. But, Hive is taking too much time in processing this query. How will you solve this problem and list the steps that I will be taking in order to do so?
+
+We can solve this problem of query latency by partitioning the table according to each month. So, for each month we will be scanning only the partitioned data instead of whole data sets.
+
+As we know, we can’t partition an existing non-partitioned table directly. So, we will be taking following steps to solve the very problem: 
+
+Create a partitioned table, say partitioned_transaction:
+CREATE TABLE partitioned_transaction (cust_id INT, amount FLOAT, country STRING) PARTITIONED BY (month STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ‘,’ ; 
+
+2. Enable dynamic partitioning in Hive:
+
+SET hive.exec.dynamic.partition = true;
+
+SET hive.exec.dynamic.partition.mode = nonstrict;
+
+3. Transfer the data from the non – partitioned table into the newly created partitioned table:
+
+INSERT OVERWRITE TABLE partitioned_transaction PARTITION (month) SELECT cust_id, amount, country, month FROM transaction_details;
+
+Now, we can perform the query using each partition and therefore, decrease the query time. 
+
+16. How can you add a new partition for the month December in the above partitioned table?
+For adding a new partition in the above table partitioned_transaction, we will issue the command give below:
+
+ALTER TABLE partitioned_transaction ADD PARTITION (month=’Dec’) LOCATION  ‘/partitioned_transaction’;
+
+Note: I suggest you to go through the dedicated blog on Hive Commands where all the commands present in Apache Hive have been explained with an example. 
+
+17. What is the default maximum dynamic partition that can be created by a mapper/reducer? How can you change it?
+By default the number of maximum partition that can be created by a mapper or reducer is set to 100. One can change it by issuing the following command:
+
+SET hive.exec.max.dynamic.partitions.pernode = <value> 
+
+Note: You can set the total number of dynamic partitions that can be created by one statement by using: SET hive.exec.max.dynamic.partitions = <value>
+
+18. Scenario: 
+I am inserting data into a table based on partitions dynamically. But, I received an error – FAILED ERROR IN SEMANTIC ANALYSIS: Dynamic partition strict mode requires at least one static partition column. How will you remove this error?
+
+To remove this error one has to execute following commands:
+
+SET hive.exec.dynamic.partition = true;
+
+SET hive.exec.dynamic.partition.mode = nonstrict;
+
+Things to Remember:
+
+By default, hive.exec.dynamic.partition configuration property is set to False in case you are using Hive whose version is prior to 0.9.0. 
+hive.exec.dynamic.partition.mode is set to strict by default. Only in non – strict mode Hive allows all partitions to be dynamic.
+19. Why do we need buckets?
+There are two main reasons for performing bucketing to a partition:
+
+A map side join requires the data belonging to a unique join key to be present in the same partition. But what about those cases where your partition key differs from that of join key? Therefore, in these cases you can perform a map side join by bucketing the table using the join key.
+Bucketing makes the sampling process more efficient and therefore, allows us to decrease the query time.
+20. How Hive distributes the rows into buckets?
+Hive determines the bucket number for a row by using the formula: hash_function (bucketing_column) modulo (num_of_buckets). Here, hash_function depends on the column data type. For integer data type, the hash_function will be: 
+
+hash_function (int_type_column)= value of int_type_column
+
+21. What will happen in case you have not issued the command:  ‘SET hive.enforce.bucketing=true;’ before bucketing a table in Hive in Apache Hive 0.x or 1.x?
+The command:  ‘SET hive.enforce.bucketing=true;’ allows one to have the correct number of reducer while using ‘CLUSTER BY’ clause for bucketing a column. In case it’s not done, one may find the number of files that will be generated in the table directory to be not equal to the number of buckets. As an alternative, one may also set the number of reducer equal to the number of buckets by using set mapred.reduce.task = num_bucket.
+
+22. What is indexing and why do we need it?
+One of the Hive query optimization methods is Hive index. Hive index is used to speed up the access of a column or set of columns in a Hive database because with the use of index the database system does not need to read all rows in the table to find the data that one has selected.
+
+23. Scenario:
+Suppose, I have a CSV file – ‘sample.csv’ present in ‘/temp’ directory with the following entries:
+
+id first_name last_name email gender ip_address
+
+1 Hugh Jackman hughjackman@cam.ac.uk Male 136.90.241.52
+
+2 David Lawrence dlawrence1@gmail.com Male 101.177.15.130
+
+3 Andy Hall andyhall2@yahoo.com Female 114.123.153.64
+
+4 Samuel Jackson samjackson231@sun.com Male 89.60.227.31
+
+5 Emily Rose rose.emily4@surveymonkey.com Female 119.92.21.19
+
+How will you consume this CSV file into the Hive warehouse using built SerDe?
+
+SerDe stands for serializer/deserializer. A SerDe allows us to convert the unstructured bytes into a record that we can process using Hive. SerDes are implemented using Java. Hive comes with several built-in SerDes and many other third-party SerDes are also available. 
+
+Hive provides a specific SerDe for working with CSV files. We can use this SerDe for the sample.csv by issuing following commands:
+
+CREATE EXTERNAL TABLE sample
+
+(id int, first_name string, 
+
+last_name string, email string,
+
+gender string, ip_address string) 
+
+ROW FORMAT SERDE ‘org.apache.hadoop.hive.serde2.OpenCSVSerde’ 
+
+STORED AS TEXTFILE LOCATION ‘/temp’;
+
+Now, we can perform any query on the table ‘sample’:
+
+SELECT first_name FROM sample WHERE gender = ‘male’;
+
+24. Scenario:
+Suppose, I have a lot of small CSV files present in /input directory in HDFS and I want to create a single Hive table corresponding to these files. The data in these files are in the format: {id, name, e-mail, country}. Now, as we know, Hadoop performance degrades when we use lots of small files.
+
+So, how will you solve this problem where we want to create a single Hive table for lots of small files without degrading the performance of the system?
+
+One can use the SequenceFile format which will group these small files together to form a single sequence file. The steps that will be followed in doing so are as follows:
+
+Create a temporary table:
+CREATE TABLE temp_table (id INT, name STRING, e-mail STRING, country STRING)
+
+ROW FORMAT FIELDS DELIMITED TERMINATED BY ‘,’ STORED AS TEXTFILE;
+
+Load the data into temp_table:
+LOAD DATA INPATH ‘/input’ INTO TABLE temp_table;
+
+Create a table that will store data in SequenceFile format:
+CREATE TABLE sample_seqfile (id INT, name STRING, e-mail STRING, country STRING)
+
+ROW FORMAT FIELDS DELIMITED TERMINATED BY ‘,’ STORED AS SEQUENCEFILE;
+
+Transfer the data from the temporary table into the sample_seqfile table:
+INSERT OVERWRITE TABLE sample SELECT * FROM temp_table;
+
+Hence, a single SequenceFile is generated which contains the data present in all of the input files and therefore, the problem of having lots of small files is finally eliminated
+
+
+
+==================================
+SQOOP
+==================================
+Top 50 Apache Sqoop Interview Questions & Answers
+BY DATAFLAIR TEAM · PUBLISHED FEBRUARY 15, 2018 · UPDATED DECEMBER 11, 2018
+
+1. Sqoop Interview Questions
+Whenever you are going for an interview even it is for Hadoop, it is a huge possibility that interviewer throws a curveball at you by start your interview with Hadoop tools. So, here you can prepare one of the most important tools available in Hadoop ecosystem that is Sqoop. This document covers best of all Sqoop Interview Questions. However, before we dive into Apache Sqoop Interview Questions and answers, let’s take a look at its brief introduction.
+
+So, let’s explore top Sqoop Interview Questions.
+
+Sqoop Interview Questions
+Sqoop Interview Questions
+
+2. Introduction to Apache Sqoop
+Sqoop − “SQL to Hadoop and Hadoop to SQL”
+While it comes to transfer data between Hadoop and relational database servers, Sqoop is the best tool. To be more specific, we use it to import data from relational databases such as MySQL, Oracle to Hadoop  HDFS, and export from the Hadoop file system to relational databases. Basically, it is provided by the Apache Software Foundation.
+Moreover, Sqoop uses two main tools. Like:
+
+Sqoop import  (Copy data from RDBMS to HDFS)
+Sqoop export  (Copy data from HDFS to RDBMS)
+Now, Let’s start discussing best Apache Sqoop Interview Questions.
+
+Get the most demanding skills of IT Industry - Learn Hadoop
+Email*
+Phone with country code*
+3. Frequently asked Sqoop Interview Questions
+So, here are top 50 Sqoop Interview Questions:
+
+Que 1. Mention the best features of Apache Sqoop.
+
+Ans. Apache Sqoop is a tool in Hadoop ecosystem have several advantages. Like
+
+Parallel import/export
+Connectors for all major RDBMS Databases
+Import results of SQL query
+Incremental Load
+Full Load
+Kerberos Security Integration
+Load data directly into Hive / HBase
+Compression
+Support for Accumulo
+To learn all features in detail, follow link: Sqoop Features 
+
+Que 2. What is Sqoop Import? Explain its purpose.
+
+Ans. While it comes to import tables from RDBMS to HDFS we use Sqoop Import tool. Generally, we can consider that each row in a table is a record in HDFS. Also, when we talk about text files all records are there as text data. However, when we talk about Avro and sequence files all records are there as binary data here. To be more specific,  it imports individual tables from RDBMS to HDFS.
+Although, there are many more insights of Sqoop Import, to learn all in detail, follow the link: Sqoop import
+
+Que 3. What is the default file format to import data using Apache Sqoop?
+
+Ans. By using two file formats Sqoop allows data import. Such as:
+
+i) Delimited Text File Format
+
+Basically, to import data using Sqoop this is the default file format. Moreover, to the import command in Sqoop, this file format can be explicitly specified using the –as-textfile argument. Likewise, passing this argument will produce the string-based representation of all the records to the output files with the delimited characters between rows and columns.
+
+ii) Sequence File Format
+
+We can say, Sequence file format is a binary file format. Their records are stored in custom record-specific data types which are shown as Java classes. In addition, Sqoop automatically creates these data types and manifests them as java classes.
+
+Que 4. How can I import large objects (BLOB and CLOB objects) in Apache Sqoop?
+
+Ans. However, direct import of BLOB and CLOB large objects is not supported by Apache Sqoop import command. So, in order to import large objects like I Sqoop, JDBC based imports have to be used without the direct argument to the import utility.
+To learn Sqoop Import in detail, follow this link.
+
+Que 5. How can you execute a free-form SQL query in Sqoop to import the rows in a sequential manner?
+
+Ans. By using the –m 1 option in the Sqoop import command we can accomplish it. Basically, it will create only one MapReduce task which will then import rows serially.
+
+Que 6. Does Apache Sqoop have a default database?
+
+Ans. Yes, MySQL is the default database.
+To learn Sqoop List Databases in detail, follow this link.
+
+Que 7. How will you list all the columns of a table using Apache Sqoop?
+
+Ans. Since to list all the columns we do not have any direct command like sqoop-list-columns. So, indirectly we can achieve this is to retrieve the columns of the desired tables and redirect them to a file that can be viewed manually containing the column names of a particular table.
+Sqoop import –m 1 –connect ‘jdbc: sqlserver: //nameofmyserver; database=nameofmydatabase; username=DeZyre; password=mypassword’ –query “SELECT column_name, DATA_TYPE FROM INFORMATION_SCHEMA.Columns WHERE table_name=’mytableofinterest’ AND \$CONDITIONS” –target-dir ‘mytableofinterest_column_name’
+To learn Sqoop list Table in detail, follow this link.
+
+Que 8.  If the source data gets updated every now and then, how will you synchronize the data in HDFS that is imported by Sqoop?
+
+Ans. By using incremental parameter with data import we can synchronize the data–
+–However, with one of the two options, we can use incremental parameter-
+i) append
+Basically, we should use incremental import with append option. Even if the table is getting updated continuously with new rows and increasing row id values then. Especially, where values of some of the columns are checked (columns to be checked are specified using –check-column) and if it discovers any modified value for those columns then only a new row will be inserted.
+ii) lastmodified
+However, in this kind of incremental import, the source has a date column which is checked for. Any records that have been updated after the last import based on the lastmodifed column in the source, the values would be updated.
+To learn Sqoop list Table in detail, follow this link.
+
+Que 9. Name a few import control commands. How can Sqoop handle large objects?
+
+Ans. To import RDBMS data, we use import control commands
+Append: Append data to an existing dataset in HDFS. 
+–append
+Columns: columns to import from the table. 
+–columns
+<col,col……> •
+Where: where clause to use during import. —
+Where the common large objects are Blog and Clob. Suppose the object is less than 16 MB, it is stored inline with the rest of the data. If there are big objects, they are temporarily stored in a subdirectory with the name _lob. Those data are then materialized in memory for processing. If we set lob limit as ZERO (0) then it is stored in external memory.
+To learn Sqoop Import in detail, follow this link.
+
+Que 10. How can we import data from particular row or column? What is the destination types allowed in Sqoop import command?
+
+Ans. Basically, on the basis of where clause, Sqoop allows to Export and Import the data from the data table. So, the syntax is
+–columns
+<col1,col2……> –where
+–query
+
+For Example:
+sqoop import –connect jdbc:mysql://db.one.com/corp –table INTELLIPAAT_EMP –where “start_date> ’2016-07-20’ ”
+sqoopeval –connect jdbc:mysql://db.test.com/corp –query “SELECT * FROM intellipaat_emp LIMIT 20”
+sqoop import –connect jdbc:mysql://localhost/database –username root –password aaaaa –columns “name,emp_id,jobtitle”
+However, into following services Sqoop supports data imported:
+
+HDFS
+Hive
+Hbase
+Hcatalog
+Accumulo
+To learn Sqoop Supported Databases in detail, follow this link.
+
+Sqoop Interview Questions for Freshers are Q. 1,2,5,6,7
+
+Sqoop Interview Questions for Experience are Q. 3,4,8,9,10
+
+Que 11. When to use –target-dir and when to use –warehouse-dir while importing data?
+
+Ans. Basically, we use –target-dir to specify a particular directory in HDFS. Whereas we use –warehouse-dir to specify the parent directory of all the sqoop jobs. So, in this case under the parent directory sqoop will create a directory with the same name as the table.
+
+Que 12. What is the process to perform an incremental data load in Sqoop?
+
+Ans. In Sqoop, the process to perform incremental data load is to synchronize the modified or updated data (often referred as delta data) from RDBMS to Hadoop. Moreover, in Sqoop the delta data can be facilitated through the incremental load command.
+In addition, by using Sqoop import command we can perform incremental load. Also, by loading the data into the hive without overwriting it. However, in Sqoop the different attributes that need to be specified during incremental load are
+1) Mode (incremental) 
+It shows how Sqoop will determine what the new rows are. Also, it has value as Append or Last Modified.
+2) Col (Check-column) 
+Basically, it specifies the column that should be examined to find out the rows to be imported.
+3) Value (last-value) 
+It denotes the maximum value of the check column from the previous import operation.
+
+Que 13. What is the significance of using –compress-codec parameter?
+
+Ans. However, we use the –compress -code parameter to get the out file of a sqoop import in formats other than .gz like .bz2.
+
+Que 14. Can free-form SQL queries be used with Sqoop import command? If yes, then how can they be used?
+
+Ans. In Sqoop, we can use SQL queries with the import command. Basically, we should use import command with the –e and – query options to execute free-form SQL queries. But note that the –target dir value must be specified While using the –e and –query options with the import command.
+
+Que 15. What is the importance of eval tool?
+
+Ans. Basically, Sqoop Eval helps to run sample SQL queries against Database as well as preview the results on the console. Moreover, it helps to know what data we can import or that desired data is imported or not.
+
+Que 16. How can you import only a subset of rows from a table?
+
+Ans. In the sqoop import statement, by using the WHERE clause we can import only a subset of rows.
+
+Que 17. What are the limitations of importing RDBMS tables into Hcatalog directly?
+
+Ans. By making use of –hcatalog –database option with the –hcatalog –table, we can import RDBMS tables into Hcatalog directly. However, there is one limitation to it is that it does not support several arguments like –as-Avro file, -direct, -as-sequencefile, -target-dir , -export-dir.
+To learn Sqoop HCatalog in detail, follow this link.
+
+Que 18. What is the advantage of using –password-file rather than -P option while preventing the display of password in the sqoop import statement?
+
+Ans.  Inside a sqoop script, we can use The –password-file option. Whereas the -P option reads from standard input, preventing automation.
+
+Que 19. What do you mean by Free Form Import in Sqoop?
+
+Ans. By using any SQL Sqoop can import data from a relational database query rather than only using table and column name parameters.
+
+Que 20. What is the role of JDBC driver in Sqoop?
+
+Ans. Basically, sqoop needs a connector to connect to different relational databases. Since, as a JDBC driver, every DB vendor makes this connector available which is specific to that DB. Hence, to interact with Sqoop needs the JDBC driver of each of the database it needs.
+
+Sqoop Interview Questions for Freshers are Q. 11,14,15,16,19
+
+Sqoop Interview Questions for Experience are Q. 12,13,17,18,20
+
+Que 21. Is JDBC driver enough to connect sqoop to the databases?
+
+Ans. No. to connect to a database Sqoop needs both JDBC and connector.
+To learn Sqoop Connector in detail, follow this link.
+
+Que 22. What is InputSplit in Hadoop?
+
+Ans. Input Split is defined as while a Hadoop job runs, it splits input files into chunks also assign each split to a mapper to process.
+
+Que 23. What is the work of Export in Hadoop sqoop?
+
+Ans. Export tool transfer the data from HDFS to RDBMS
+To learn Sqoop Export in detail, follow this link.
+
+Que 24. Use of Codegen command in Hadoop sqoop?
+
+Ans. Basically, Codegen command generates code to interact with database records
+To learn Sqoop Codegen in detail, follow this link.
+
+Que 25. Use of Help command in Hadoop sqoop?
+
+Ans. Help command in Hadoop sqoop generally list available commands
+
+Que 26.  How can you schedule a sqoop job using Oozie?
+
+Ans. However, Oozie has in-built sqoop actions inside which we can mention the sqoop commands to be executed.
+To learn Sqoop Job in detail, follow this link.
+
+Que 27. What is the importance of — the split-by clause in running parallel import tasks in sqoop?
+
+Ans. In Sqoop, it mentions the column name based on whose value the data will be divided into groups of records. Further, by the MapReduce tasks, these group of records will be read in parallel.
+
+Que 28. What is a sqoop metastore?
+
+Ans. A tool that Sqoop hosts a shared metadata repository is what we call sqoop metastore. Moreover, multiple users and/or remote users can define and execute saved jobs (created with the sqoop job) defined in this metastore.
+In addition, with the –meta-connect argument Clients must be configured to connect to the metastore in sqoop-site.xml.
+To learn Sqoop Job in detail, follow this link.
+
+Que 29. What is the purpose of sqoop-merge?
+
+Ans. The merge tool combines two datasets where entries in one dataset should overwrite entries of an older dataset preserving only the newest version of the records between both the data sets.
+To learn Sqoop Merge in detail, follow this link.
+
+Que 30. How can you see the list of stored jobs in sqoop metastore?
+
+Ans. sqoop job –list
+
+Sqoop Interview Questions for Freshers are Q. 21,22,23,25,28
+
+Sqoop Interview Questions for Experience are Q. 24,26,27,29,30
+
+Que 31. Which database the sqoop metastore runs on?
+
+Ans. Basically, on the current machine running sqoop-metastore launches, a shared HSQLDB database instance.
+
+Que 32. Where can the metastore database be hosted?
+
+Ans. Anywhere, it means we can host metastore database within or outside of the Hadoop cluster.
+
+Que 33. Give the sqoop command to see the content of the job named myjob?
+
+Ans. Sqoop job –show myjob
+
+Que 34. How can you control the mapping between SQL data types and Java types?
+
+Ans. we can configure the mapping between by using the –map-column-java property.
+For example:
+$ sqoop import … –map-column-java id = String, value = Integer
+To learn Java Data types in detail, follow this link.
+
+Que 35. Is it possible to add a parameter while running a saved job?
+
+Ans. Yes, by using the –exec option we can add an argument to a saved job at runtime.
+sqoop job –exec jobname — — newparameter
+
+Que 36. What is the usefulness of the options file in sqoop.
+
+Ans. To specify the command line values in a file and use it in the sqoop commands we use the options file in sqoop.
+For example
+The –connect parameter’s value and –user name value scan be stored in a file and used again and again with different sqoop commands.
+
+Que 37. How can you avoid importing tables one-by-one when importing a large number of tables from a database?
+
+Ans. Using the command
+sqoop import-all-tables
+–connect
+–usrename
+–password
+–exclude-tables table1,table2 ..
+Basically, this will import all the tables except the ones mentioned in the exclude-tables clause.
+To learn Sqoop import-all-tables in detail, follow this link.
+
+Que 38. How can you control the number of mappers used by the sqoop command?
+
+Ans. To control the number of mappers executed by a sqoop command we use the parameter –num-mappers. Moreover, we should start with choosing a small number of map tasks and then gradually scale up as choosing high number of mappers initially may slow down the performance on the database side.
+
+Que 39. What is the default extension of the files produced from a sqoop import using the –compress parameter?
+
+Ans. .gz
+
+Que 40. What is the significance of using –compress-codec parameter?
+
+Ans. We use the –compress -code parameter to get the out file of a sqoop import in formats other than .gz like .bz2.
+
+Sqoop Interview Questions for Freshers are Q. 31,32,33,34,35
+
+Sqoop Interview Questions for Experience are Q. 36,37,38,39,40
+
+Que 41. What is a disadvantage of using –direct parameter for faster data load by sqoop?
+
+Ans. The native utilities used by databases to support faster laod do not work for binary data formats like SequenceFile.
+
+Que 42. How will you update the rows that are already exported?
+
+Ans. Basically, to update existing rows we can use the parameter –update-key. Moreover, in it, a comma-separated list of columns is used which uniquely identifies a row. All of these columns are used in the WHERE clause of the generated UPDATE query. All other table columns will be used in the SET part of the query.
+
+Que 43. What are the basic commands in Apache Sqoop and its uses?
+
+Ans. The basic commands of Apache Sqoop are:
+Codegen, Create-hive-table, Eval, Export, Help, Import, Import-all-tables, List-databases, List-tables, Versions.
+Moreover, uses of Apache Sqoop basic commands are:
+
+Codegen- It helps to generate code to interact with database records.
+Create- hive-table- It helps to Import a table definition into a hive
+Eval- It helps to evaluate SQL statement and display the results
+Export- It helps to export an HDFS directory into a database table
+Help- It helps to list the available commands
+Import- It helps to import a table from a database to HDFS
+Import-all-tables- It helps to import tables from a database to HDFS
+List-databases- It helps to list available databases on a server
+List-tables- It helps to list tables in a database
+Version- It helps to display the version information
+Que 44. How Sqoop word came? Sqoop is which type of tool and the main use of sqoop?
+
+Ans. Sqoop word came from SQL+HADOOP=SQOOP. 
+Basically, it is a data transfer tool. We use Sqoop to import and export a large amount of data from RDBMS to HDFS and vice versa.
+Follow this link to know more about Sqoop
+
+Que 45. What is Sqoop Validation?
+
+Ans. It means to validate the data copied. Either import or export by comparing the row counts from the source as well as the target post copy. Likewise, we use this option to compare the row counts between source as well as the target just after data imported into HDFS. Moreover, While during the imports, all the rows are deleted or added, Sqoop tracks this change. Also updates the log file.
+Learn all insights of Sqoop Validation, follow the link: Sqoop Validation – Interfaces & Limitations of Sqoop Validate 
+
+Que 46. What is Purpose to Validate in Sqoop?
+
+Ans. In Sqoop to validate the data copied is Validation main purpose. Basically, either Sqoop import or Export by comparing the row counts from the source as well as the target post copy.
+
+Que 47. What is Sqoop Job?
+
+Ans. To perform an incremental import if a saved job is configured, then state regarding the most recently imported rows is updated in the saved job. Basically, that allows the job to continually import only the newest rows.
+Learn all insights of Sqoop job, follow the link: Sqoop- Introduction to Sqoop Job Tutorial   
+
+Que 48. What is Sqoop Import Mainframe Tool and its Purpose?
+
+Ans. Basically, a tool which we use to import all sequential datasets in a partitioned dataset (PDS) on a mainframe to HDFS is Sqoop Import Mainframe. That tool is what we call import mainframe tool. Also, A PDS is akin to a directory on the open systems. Likewise, in a dataset, the records can only contain character data. Moreover here, records will be stored as a single text field with the entire record.
+Learn all insights of Sqoop Import Mainframe, follow the link: Learn Sqoop Import Mainframe Tool – Syntax and Examples
+
+Que 49. What is the purpose of Sqoop List Tables?
+
+Ans. Basically, the main purpose of sqoop-list-tables is list tables present in a database.
+Learn all insights of Sqoop List Tables, follow the link: Sqoop List Tables – Arguments and Examples 
+
+Que 50. Difference Between Apache Sqoop vs Flume.
+
+Ans. So, let’s discuss all the differences on the basis of features.
+
+a. Data Flow
+Apache Sqoop – Basically, Sqoop works with any type of relational database system (RDBMS) that has the basic JDBC connectivity. Also, Sqoop can import data from NoSQL databases like MongoDB, Cassandra and along with it. Moreover, it allows data transfer to Apache Hive or HDFS.
+Apache Flume– Likewise, Flume works with streaming data sources those are generated continuously in Hadoop environments. Like log files.
+
+b. Type of Loading
+Apache Sqoop – Basically,  Sqoop load is not driven by events.
+Apache Flume – Here, data loading is completely event-driven.
+
+c. When to use
+Apache Sqoop – However, if the data is being available in Teradata, Oracle, MySQL, PostreSQL or any other JDBC compatible database it is considered an ideal fit.
+Apache Flume – While we move bulk of streaming data from sources likes JMS or spooling directories, it is the best choice.
+
+d. Link to HDFS
+Apache Sqoop – Basically, for importing data in Apache Sqoop, HDFS is the destination
+Apache Flume – In Apache Flume, data generally flow to HDFS through channels
+
+e. Architecture 
+Apache Sqoop – Basically, it has connector based architecture. However, that means the connectors know a great deal in connecting with the various data sources. Also to fetch data correspondingly.
+Apache Flume – However, it has agent-based architecture. Basically, it means code written in Flume is we call agent that may responsible for fetching the data.
+Also, learn complete comparison, follow link Apache Sqoop vs Flume- Comparison
+
+Sqoop Interview Questions for Freshers are Q. 41,42,43,44,45
+
+Sqoop Interview Questions for Experience are Q. 46,47,48,49,50
+
+So, this was all in Apache Sqoop Interview Questions.
