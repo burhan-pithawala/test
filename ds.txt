@@ -1,0 +1,1070 @@
+http://www.thinkingmachines.in/toppdf/TMDataStructures.pdf
+
+// Mearge sort
+
+def meargeSort(lst,start,end):
+    #print(id(lst))
+    if(start<end):
+        #print("ms",start,end)
+        mid = (start+end)/2
+        meargeSort(lst,start,mid)
+        meargeSort(lst,mid+1,end)
+        merge(lst,start,mid,end)
+        #print(lst[start:end+1])
+        
+    
+def merge(lst,start,mid,end):
+    temp_lst=[]
+    i=start
+    j=mid+1
+    k=0
+    #print(i,j,end)
+    while(i<=mid and j<=end):
+        if(lst[i] < lst[j]):
+            temp_lst.append(lst[i])
+            i = i+1
+        else:
+            temp_lst.append(lst[j])
+            j = j+1
+            
+    while(i<=mid):
+        temp_lst.append(lst[i])
+        i = i+1
+        
+    while(j<=end):
+        temp_lst.append(lst[j])
+        j= j+1
+        
+    for i in range(start,end+1):
+        lst[i] = temp_lst[k]
+        k=k+1
+    
+    #print("merge",id(lst))
+    
+    
+if __name__ = "__main__":
+    lst = [5,2,6,43,8,1,3,6,99,4,11,3,25,1]
+    meargeSort(lst,0,len(lst)-1)
+    print(lst)
+--------------------------------------------------------
+
+
+Quick Sort
+#include<stdio.h>
+int partition(int *x,int lb,int ub)
+{
+int e,f,g,num;
+num=x[lb];
+e=lb;
+f=ub;
+while(1)
+{
+while(1)
+{
+if(e==ub || x[e]>num)
+{
+break;
+}
+e++;
+}
+while(1)
+{
+if(f==lb || x[f]<=num)
+{
+break;
+}
+f--;
+}
+if(e<f)
+{
+g=x[e];
+x[e]=x[f];
+x[f]=g;
+}
+else
+{
+g=x[lb];
+x[lb]=x[f];
+x[f]=g;
+break;
+}
+}
+return f;
+}
+void quickSort(int *x,int lb,int ub)
+{
+int partitionPoint;
+if(ub<=lb)
+{
+return;
+}
+partitionPoint=partition(x,lb,ub);
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 84
+quickSort(x,lb,partitionPoint-1);
+quickSort(x,partitionPoint+1,ub);
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+quickSort(x,0,9);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+}
+return 0;
+}
+//Bubble Sort
+#include<stdio.h>
+void bubbleSort(int *x,int size)
+{
+int e,f,m,g;
+m=size-2;
+while(m>=0)
+{
+e=0;
+f=1;
+while(e<=m)
+{
+if(x[f]<x[e])
+{
+g=x[e];
+x[e]=x[f];
+x[f]=g;
+}
+e++;
+f++;
+}
+m--;
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 85
+bubbleSort(x,10);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+}
+return 0;
+}
+//Linear sort
+#include<stdio.h>
+void linearSort(int *x,int size)
+{
+int e,f,g;
+e=0;
+while(e<=size-2)
+{
+f=e+1;
+while(f<=size-1)
+{
+if(x[f]<x[e])
+{
+g=x[e];
+x[e]=x[f];
+x[f]=g;
+}
+f++;
+}
+e++;
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+linearSort(x,10);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+}
+return 0;
+}
+// Selection Sort
+#include<stdio.h>
+void selectionSort(int *x,int size)
+{
+int e,f,m,g;
+e=0;
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 86
+while(e<=size-2)
+{
+m=e;
+f=e+1;
+while(f<=size-1)
+{
+if(x[f]<x[m])
+{
+m=f;
+}
+f++;
+}
+g=x[e];
+x[e]=x[m];
+x[m]=g;
+e++;
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+selectionSort(x,10);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+}
+return 0;
+}
+// Radix Sort
+#include<Stdio.h>
+int queue[10][100];
+int front[10]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+int rear[10]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+void addToQueue(int i,int num)
+{
+rear[i]++;
+queue[i][rear[i]]=num;
+if(front[i]==-1) front[i]=0;
+}
+int removeFromQueue(int i)
+{
+int num;
+if(front[i]==-1) return -1; // queue is empty
+num=queue[i][front[i]];
+front[i]++;
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 87
+if(front[i]>rear[i])
+{
+front[i]=-1;
+rear[i]=-1;
+}
+return num;
+}
+int isEmpty(int i)
+{
+return front[i]==-1;
+}
+void radixSort(int x[],int lb,int ub)
+{
+int digitPlace,num,y,e,f,digit,z;
+digitPlace=1;
+e=10;
+f=1;
+while(digitPlace<=4)
+{
+y=lb;
+while(y<=ub)
+{
+num=x[y];
+digit=(num%e)/f;
+addToQueue(digit,num);
+y++;
+}
+y=0;
+z=0;
+while(y<=9)
+{
+while(1)
+{
+if(isEmpty(y))
+{
+break;
+}
+num=removeFromQueue(y);
+x[z]=num;
+z++;
+}
+y++;
+}
+e=e*10;
+f=f*10;
+digitPlace++;
+}
+}
+int main()
+{
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 88
+int x[10],y,e,f;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+radixSort(x,0,9);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+}
+return 0;
+}
+// Insertion sort
+#include<stdio.h>
+void insertionSort(int *x,int lb,int ub)
+{
+int p,j,num,y;
+y=lb+1;
+while(y<=ub)
+{
+p=y;
+num=x[p];
+j=p-1;
+while(j>=lb)
+{
+if(num>=x[j])
+{
+break; // we have found the position for num
+}
+x[j+1]=x[j]; // shifting
+j--;
+p--;
+}
+x[p]=num;
+y++;
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+insertionSort(x,0,9);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 89
+}
+return 0;
+}
+// Merge sort
+#include<stdio.h>
+void merge(int a[], int low, int high, int mid)
+{
+int i, j, k, c[50];
+i=low;
+j=mid+1;
+k=low;
+while((i<=mid)&&(j<=high))
+{
+if(a[i]<a[j])
+{
+c[k]=a[i];
+k++;
+i++;
+}
+else
+{
+c[k]=a[j];
+k++;
+j++;
+}
+}
+while(i<=mid)
+{
+c[k]=a[i];
+k++;
+i++;
+}
+while(j<=high)
+{
+c[k]=a[j];
+k++;
+j++;
+}
+for(i=low;i<k;i++)
+{
+a[i]=c[i];
+}
+}
+void mergesort(int a[], int low, int high)
+{
+int mid;
+if(low<high)
+{
+mid=(low+high)/2;
+mergesort(a,low,mid);
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 90
+mergesort(a,mid+1,high);
+merge(a,low,high,mid);
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+mergesort(x,0,9);
+for(y=0;y<=9;y++) printf("%d\n",x[y]);
+return 0;
+}
+// Heap sort
+#include<stdio.h>
+void heapSort(int *x,int size)
+{
+int k,j,i,m,g;
+i=1;
+while(i<size)
+{
+m=i;
+do
+{
+k=(m-1)/2;
+if(x[k]<x[m])
+{
+g=x[k];
+x[k]=x[m];
+x[m]=g;
+}
+m=k;
+}while(m!=0);
+i++;
+}
+for(j=size-1;j>=0;j--)
+{
+g=x[0];
+x[0]=x[j];
+x[j]=g;
+k=0;
+do{
+m=2*k+1;
+if((x[m]<x[m+1]) && m<j-1)
+{
+m++;
+}
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 91
+if(x[k]<x[m] && m<j)
+{
+g=x[k];
+x[k]=x[m];
+x[m]=g;
+}
+k=m;
+}while(m<j);
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++
+{
+printf("Enter a number");
+scanf("%d",&x[y]);
+}
+heapSort(x,10);
+for(y=0;y<=9;y++) printf("%d\n",x[y]);
+return 0;
+}
+// Shell sort
+#include<stdio.h>
+void shellSort(int *x,int lb,int ub)
+{
+int p,j,num,y;
+int size,distanceFactor;
+size=ub-lb+1;
+distanceFactor=size/2;
+while(distanceFactor>0)
+{
+y=lb+distanceFactor;
+while(y<=ub)
+{
+p=y;
+num=x[p];
+j=p-distanceFactor;
+while(j>=lb)
+{
+if(num>=x[j])
+{
+break; // we have found the position for num
+}
+x[j+distanceFactor]=x[j]; // shifting
+j=j-distanceFactor;
+p=p-distanceFactor;
+}
+x[p]=num;
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 92
+y=y+distanceFactor;
+}
+distanceFactor=distanceFactor/2;
+}
+}
+int main()
+{
+int x[10],y;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number : ");
+scanf("%d",&x[y]);
+}
+shellSort(x,0,9);
+for(y=0;y<=9;y++)
+{
+printf("%d\n",x[y]);
+}
+return 0;
+}
+// Sequential Search
+#include<stdio.h>
+int sequentialSearch(int x[],int lowerBound,int upperBound,int lookFor)
+{
+int y;
+y=lowerBound;
+while(y<=upperBound)
+{
+if(x[y]==lookFor) return y;
+y++;
+}
+return -1;
+}
+int main()
+{
+int x[10],y,lookFor,foundAt;
+for(y=0;y<=9;y++)
+{
+printf("Enter a number");
+scanf("%d",&x[y]);
+}
+printf("Search what : ");
+scanf("%d",&lookFor);
+foundAt=sequentialSearch(x,0,9,lookFor);
+if(foundAt==-1) printf("%d not found",lookFor);
+else printf("%d found at index %d",lookFor,foundAt);
+}
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 93
+// An example of Hash / linear probing - in case of collision
+#include<stdio.h>
+struct Student
+{
+int rollNumber;
+char name[21];
+};
+// The application is based on the requirement analysis result that
+// number of students will never exceed 1000
+struct Student records[1000];
+void clearGarbageValues()
+{
+int x;
+for(x=0;x<=999;x++)
+{
+records[x].rollNumber=0;
+records[x].name[0]='\0';
+}
+}
+int recordCount=0;
+int hashFunction(int data)
+{
+int key=data%1000; // 1000, because size of array is 1000 ( key index should be in between(0-
+999));
+// The hash function can be defined in many ways.
+return key;
+}
+/* Collision Resolution Strategies (Discussed in classroom session)
+a) Linear probing (increment key with 1) till empty slot is found
+b) Quadratic probing
+(some mathematical formula till empty slot is found) (HF(data)+key^2)%arraySize
+c) Chaining ( a linked list against the found key slot to accomodate items with same keys )
+*/
+int getNewKeyAfterLinearProbing(int key)
+{
+key++;
+if(key==1000) key=0;
+while(records[key].rollNumber!=0)
+{
+key++;
+if(key==1000) key=0;
+}
+return key;
+}
+int exists(int rollNumber)
+{
+int key,i;
+key=hashFunction(rollNumber);
+if(records[key].rollNumber!=rollNumber)
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 94
+{
+i=key+1;
+if(i==1000) i=0;
+while(i!=key)
+{
+if(records[i].rollNumber==rollNumber)
+{
+break;
+}
+i++;
+if(i==1000) i=0;
+}
+if(i==key)
+{
+return -1;
+}
+else
+{
+key=i;
+}
+}
+return key;
+}
+void searchStudent()
+{
+int rollNumber,key;
+printf("Enter roll number");
+scanf("%d",&rollNumber);
+fflush(stdin);
+if(rollNumber<=0)
+{
+printf("Invalid roll number\n");
+return;
+}
+key=exists(rollNumber);
+if(key==-1)
+{
+printf("Invalid roll number\n");
+return;
+}
+printf("Name %s\n",records[key].name);
+}
+void addStudent()
+{
+int rollNumber,key;
+printf("Enter roll Number");
+scanf("%d",&rollNumber);
+fflush(stdin);
+if(rollNumber<=0)
+{
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 95
+printf("Invalid roll number\n");
+return;
+}
+key=exists(rollNumber);
+if(key!=-1)
+{
+printf("That roll number alloted to %s\n",records[key].name);
+return;
+}
+key=hashFunction(rollNumber);
+if(records[key].rollNumber!=0) // Slot is occupied
+{
+key=getNewKeyAfterLinearProbing(key);
+}
+records[key].rollNumber=rollNumber;
+printf("Enter name : ");
+gets(records[key].name);
+fflush(stdin);
+recordCount++;
+}
+int main()
+{
+int ch;
+while(1)
+{
+printf("1. Add Student\n");
+printf("2. Search Student\n");
+printf("3. Exit\n");
+printf("Enter your choice ");
+scanf("%d",&ch);
+fflush(stdin);
+if((ch==1) && recordCount==1000)
+{
+printf("Cannot add more than 1000 records\n");
+continue;
+}
+if(ch==2 && recordCount==0)
+{
+printf("Records not added\n");
+continue;
+}
+if(ch==1) addStudent();
+if(ch==2) searchStudent();
+if(ch==3) break;
+}
+return 0;
+}
+
+--------------------------------------------------
+Binary Search Tree (BST)
+#include<stdio.h>
+#include<malloc.h>
+struct Node
+{
+int num;
+struct Node *left,*right;
+};
+// the stack implementation can be converted to a singly linked list implementation if you don't want
+the limit of 1000 numbers.
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 62
+struct Node *stack[1000];
+int upperBound=999;
+int top=1000; // upperBound+1
+void push(struct Node *t)
+{
+top--;
+stack[top]=t;
+}
+struct Node * pop()
+{
+struct Node *t;
+t=stack[top];
+top++;
+return t;
+}
+struct Node * getElementAtTop()
+{
+return stack[top];
+}
+int isEmpty()
+{
+return top==upperBound+1;
+}
+struct Node *start=NULL;
+void addNode(int num)
+{
+struct Node *t,*j;
+t=(struct Node *)malloc(sizeof(struct Node));
+t->num=num;
+t->left=NULL;
+t->right=NULL;
+if(start==NULL)
+{
+start=t;
+}
+else
+{
+j=start;
+while(1)
+{
+if(t->num<j->num)
+{
+if(j->left==NULL)
+{
+j->left=t;
+break;
+}
+else
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 63
+{
+j=j->left;
+}
+}
+else
+{
+if(j->right==NULL)
+{
+j->right=t;
+break;
+}
+else
+{
+j=j->right;
+}
+}
+}
+}
+}
+void removeNode(int num)
+{
+struct Node *t,*j,*e,*f;
+t=start;
+while(t!=NULL)
+{
+if(num==t->num)
+{
+break;
+}
+j=t;
+if(num<t->num)
+{
+t=t->left;
+}
+else
+{
+t=t->right;
+}
+}
+if(t==NULL)
+{
+printf("%d not found\n",num);
+return;
+}
+if(t==start)
+{
+if(t->left==NULL && t->right==NULL)
+{
+start=NULL;
+free(t);
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 64
+return;
+}
+if(t->left==NULL)
+{
+start=t->right;
+free(t);
+return;
+}
+if(t->right==NULL)
+{
+start=t->left;
+free(t);
+return;
+}
+e=t->left;
+f=t->right;
+while(f->left!=NULL)
+{
+f=f->left;
+}
+f->left=e;
+start=t->right;
+free(t);
+return;
+}
+if(t->num<j->num)
+{
+if(t->left==NULL && t->right==NULL)
+{
+j->left=NULL;
+free(t);
+return;
+}
+if(t->left==NULL)
+{
+j->left=t->right;
+free(t);
+return;
+}
+if(t->right==NULL)
+{
+j->left=t->left;
+free(t);
+return;
+}
+e=t->left;
+f=t->right;
+while(f->left!=NULL)
+{
+f=f->left;
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 65
+}
+f->left=e;
+j->left=t->right;
+free(t);
+}
+else
+{
+if(t->left==NULL && t->right==NULL)
+{
+j->right=NULL;
+free(t);
+return;
+}
+if(t->left==NULL)
+{
+j->right=t->right;
+free(t);
+return;
+}
+if(t->right==NULL)
+{
+j->right=t->left;
+free(t);
+return;
+}
+e=t->left;
+f=t->right;
+while(f->left!=NULL)
+{
+f=f->left;
+}
+f->left=e;
+j->right=t->right;
+free(t);
+}
+}
+void inOrder(struct Node *t)
+{
+if(t==NULL)
+{
+return;
+}
+inOrder(t->left);
+printf("%d\n",t->num);
+inOrder(t->right);
+}
+void inOrderUsingStack()
+{
+struct Node *t;
+t=start;
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 66
+while(1)
+{
+if(t!=NULL)
+{
+push(t);
+t=t->left;
+}
+else
+{
+if(isEmpty()) break;
+t=pop();
+printf("%d\n",t->num);
+t=t->right;
+}
+}
+}
+void preOrder(struct Node *t)
+{
+if(t==NULL)
+{
+return;
+}
+printf("%d\n",t->num);
+preOrder(t->left);
+preOrder(t->right);
+}
+void preOrderUsingStack()
+{
+struct Node *t;
+t=start;
+while(1)
+{
+if(t!=NULL)
+{
+printf("%d\n",t->num);
+push(t);
+t=t->left;
+}
+else
+{
+if(isEmpty()) break;
+t=pop();
+t=t->right;
+}
+}
+}
+void postOrder(struct Node *t)
+{
+if(t==NULL)
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 67
+{
+return;
+}
+postOrder(t->left);
+postOrder(t->right);
+printf("%d\n",t->num);
+}
+void postOrderUsingStack()
+{
+struct Node *t;
+if(start==NULL) return;
+t=start;
+while(1)
+{
+while (t!=NULL)
+{
+if (t->right!=NULL)
+{
+push(t->right);
+}
+push(t);
+t=t->left;
+}
+t=pop(stack);
+if(t->right!=NULL && getElementAtTop()==t->right)
+{
+pop();
+push(t);
+t=t->right;
+}
+else
+{
+printf("%d\n",t->num);
+t=NULL;
+}
+if(isEmpty()) break;
+}
+}
+int main()
+{
+int ch,num;
+while(1)
+{
+printf("1. Add a number\n");
+printf("2. Remove a number\n");
+printf("3. Inorder Traversal (using recursion) \n");
+printf("4. Preorder Traversal (using recursion)\n");
+printf("5. Postorder Traversal (using recursion)\n");
+printf("6. Inorder traversal (using Stack)\n");
+Thinking Machines – Data Structures – Get the highest paid jobs as programmers Page 68
+printf("7. Preorder traversal (using Stack)\n");
+printf("8. Postorder traversal (using Stack)\n");
+printf("9. Exit\n");
+printf("Enter your choice :");
+scanf("%d",&ch);
+if(ch==1)
+{
+printf("Enter number to add : ");
+scanf("%d",&num);
+addNode(num);
+}
+if(ch==2)
+{
+printf("Enter number to remove : ");
+scanf("%d",&num);
+removeNode(num);
+}
+if(ch==3)
+{
+inOrder(start);
+}
+if(ch==4)
+{
+preOrder(start);
+}
+if(ch==5)
+{
+postOrder(start);
+}
+if(ch==6)
+{
+inOrderUsingStack();
+}
+if(ch==7)
+{
+preOrderUsingStack();
+}
+if(ch==8)
+{
+postOrderUsingStack();
+}
+if(ch==9)
+{
+break;
+}
+}
+return 0;
+}
+
+---------------------------

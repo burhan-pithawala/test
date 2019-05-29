@@ -1,0 +1,677 @@
+ooch1zoongahfaesh0ahxe0Iesa7reah
+
+/etc/hadoop/conf/
+
+core-site.xml
+fs.defaultfs -- to get namenode link (port 50070)
+
+hdfs-ste.xml
+we will get block size and replication factor from here
+
+yarn-site.xml
+yarn.resourcemanager.webapp.address -- to get to the resource manager link
+
+
+/etc/spark/conf/
+spark-env.sh
+we will get default num-executors and num-cores from here
+
+
+>> sqoop version
+
+>> sqoop help import
+
+>> mysql -u <user_name> -h <host> -p
+>> mysql -u retail_user -h ms.itversity.com -p
+>> <password for this is 'itversity'>
+
+sqoop list-databases \
+	--connect "jdbc:mysql://ms.itversity.com:3306" \
+	--username retail_user \
+	--password itversity
+	
+	
+sqoop list-tables \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity
+	
+sqoop eval --connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--query "SELECT * FROM orders LIMIT 10"
+	
+sqoop eval --connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--query "INSERT INTO orders VALUES (10000,'2018-10-01 00:00:00.0',123456,'DUMMY')"
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	-- target-dir /user/hadoop_bigdata/sqoop_import/retail_db/order_items
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir 
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	-m 1 \
+	--delete-target-dir 
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	-m 1 \
+	--append 
+	
+// Things to remember while using split-by
+// -> Coulmn should be index (because if it is not then it will take long time to find min  and max values and also to split 
+//    them using these values)
+// -> values in the feild should be sparse
+// -> often it should be sequence generated or evenly incremented
+// -> it should not have null values
+
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items_nopk \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	--split-by order_item_order_id
+	
+// if we split-by an non numeric field then it will give error
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table orders \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	--split-by order_status
+	
+// to allow split-by non numeric column we need to add set this property -Dorg.apache.sqoop.splitter.allow_text_splitter=true
+
+sqoop import \
+	-Dorg.apache.sqoop.splitter.allow_text_splitter=true \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table orders \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	--split-by order_status
+	
+
+sqoop import-all-tables \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db1 \
+	--autoreset-to-one-mapper
+	
+// note: while using import-all-table we cannot use --delete-target-dir
+
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	-m 3 \
+	--as-avrodatafile
+	
+// --as-avrodatafile
+// --as-sequencefile
+// --as-textfile
+// --as-parquetfile
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	-m 3 \
+	--as-textfile \
+	--compress 
+	
+// if we do not provide --compression-codec then by default it  takes gzip
+// to get the codec information go to /etc/hadoop/conf/core-site.xml and search for codec
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	-m 3 \
+	--as-textfile \
+	--compress \
+	--compression-codec org.apache.hadoop.io.compress.SnappyCodec
+	
+// maybe gz and snappy compression does not work with avro data file
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir  \
+	--boundary-query "select min(order_item_id),max(order_item_id) from order_items where order_item_id > 99999"
+	
+// this min and max values will be fed into tbelow query by sqoop
+// select * from order_items where order_item_id >= <min-id> and order_item_id < <max-id>
+
+//19/02/14 00:09:38 WARN db.DataDrivenDBInputFormat: 
+//Could not find $CONDITIONS token in query: 
+//select min(order_item_id),max(order_item_id) from order_items where order_item_id > 99999; splits may not partition data.
+
+
+//Practical pending
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--table order_items \
+	--columns order_item_order_id,order_item_id,order_item_subtotal \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	--delete-target-dir \
+	-m 3
+
+// query cannot be used with table and/or columns
+// for query split-by is compulsary if num-mappers is greater than 1
+// also for query we have to give \$CONDITIONS else it will fail
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--target-dir /user/hadoop_bigdata/sqoop_import/retail_db/orders_with_revenue \
+	--delete-target-dir \
+	-m 2 \
+	--query "select o.*, sum(oi.order_item_subtotal) as order_revenue from orders o join order_items oi on o.order_id = oi.order_item_order_id and \$CONDITIONS group by o.order_id, o.order_date, o.order_customer_id, o.order_status" \
+	--split-by order_id
+	
+sqoop import \
+	--connect jdbc:mysql://ms.itversity.com:3306/hr_db \
+	--username hr_user \
+	--password itversity \
+	--table employees \
+	--null-string "" \
+	--null-non-string -1 \
+	--fields-terminated-by "\t" \
+	--lines-terminated-by "A" \
+	--optionally-enclosed-by \' \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/hr_db \
+	--delete-target-dir
+	
+
+sqoop import \
+	--connect jdbc:mysql://ms.itversity.com:3306/retail_export \
+	--username retail_user \
+	--password itversity \
+	--table hadoop_bigdata_test \
+	--null-string "" \
+	--null-non-string -1 \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_export \
+	--delete-target-dir \
+	-m 1
+	
+	
+//ascii null character \000
+sqoop import \
+	--connect jdbc:mysql://ms.itversity.com:3306/hr_db \
+	--username hr_user \
+	--password itversity \
+	--table employees \
+	--null-string "" \
+	--null-non-string -1 \
+	--fields-terminated-by "\000" \
+	--lines-terminated-by ":" 
+	
+	
+//note - while using --query we cannot use warehouse-dir we need to use target-dir
+
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--target-dir /user/hadoop_bigdata/sqoop_import/retail_db/orders \
+	-m 2 \
+	--query "select * from orders where \$CONDITIONS and order_date like '2014-01%'" \
+	--split-by order_id \
+	--append
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	-m 2 \
+	--table orders \
+	--where "order_date like '2014-02%'" \
+	--append
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--target-dir /user/hadoop_bigdata/sqoop_import/retail_db/orders \
+	-m 2 \
+	--query "select * from orders where \$CONDITIONS and order_date like '2014-01%'" \
+	--split-by order_id \
+	--append
+	
+sqoop import \
+	--connect "jdbc:mysql://ms.itversity.com:3306/retail_db" \
+	--username retail_user \
+	--password itversity \
+	--warehouse-dir /user/hadoop_bigdata/sqoop_import/retail_db \
+	-m 2 \
+	--table orders \
+	--check-column order_date \
+	--incremental append \
+	--last-value '2014-02-28'
+	
+-------------------------------------------------------------------------------------------------------------
+
+
+#example.conf: A single-node Flume configuration
+
+#Name the components of this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+#Describe/configure the source
+a1.sources.r1.type = netcat
+a1.sources.r1.bind = localhost
+a1.sources.r1.port = 44444
+
+#Describe/configure the sinks
+a1.sinks.ki.type = logger
+
+#Describe/configure the channels
+# use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+#Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.ki.channel = c1
+
+------------------------------------------------------------------
+#wshdfs.conf
+#Name the components of this agent
+wh.sources = ws
+wh.sinks = k1
+wh.channels = mem
+
+#Describe/configure the source
+wh.sources.ws.type = exec
+wh.sources.ws.command = tail -F /opt/gen_logs/logs/access.log
+
+#Describe/configure the sinks
+wh.sinks.ki.type = logger
+
+#Describe/configure the channels
+# use a channel which buffers events in memory
+wh.channels.mem.type = memory
+wh.channels.mem.capacity = 1000
+wh.channels.mem.transactionCapacity = 100
+
+#Bind the source and sink to the channel
+wh.sources.ws.channels = mem
+wh.sinks.k1.channel = mem
+
+------------------------------------------------
+flume-ng agent -n wh -f /home/hadoop_bigdata/flume_demo/wslogstohdfs/wshdfs.conf --conf /home/hadoop_bigdata/flume_demo/conf/
+
+/etc/hadoop/conf/core-site
+property - fs.defalutFS
+value - hdfs://nn01.itversity.com:8020
+
+#wshdfs.conf
+#Name the components of this agent
+wh.sources = ws
+wh.sinks = hd
+wh.channels = mem
+
+#Describe/configure the source
+wh.sources.ws.type = exec
+wh.sources.ws.command = tail -F /opt/gen_logs/logs/access.log
+
+#Describe/configure the sinks
+wh.sinks.hd.type = hdfs
+wh.sinks.hd.hdfs.path = hdfs://nn01.itversity.com:8020/user/hadoop_bigdata/flume_demo
+
+#Describe/configure the channels
+# use a channel which buffers events in memory
+wh.channels.mem.type = memory
+wh.channels.mem.capacity = 1000
+wh.channels.mem.transactionCapacity = 100
+
+#Bind the source and sink to the channel
+wh.sources.ws.channels = mem
+wh.sinks.hd.channel = mem
+
+-------------------------------------------------
+
+#wshdfs.conf
+#Name the components of this agent
+wh.sources = ws
+wh.sinks = hd
+wh.channels = mem
+
+#Describe/configure the source
+wh.sources.ws.type = exec
+wh.sources.ws.command = tail -F /opt/gen_logs/logs/access.log
+
+#Describe/configure the sinks
+wh.sinks.hd.type = hdfs
+wh.sinks.hd.hdfs.path = hdfs://nn01.itversity.com:8020/user/hadoop_bigdata/flume_demo
+wh.sinks.hd.hdfs.filePrefix = FlumeDemo
+wh.sinks.hd.hdfs.fileSuffix = .txt
+wh.sinks.hd.hdfs.rollInterval = 120
+wh.sinks.hd.hdfs.rollSize = 1048576
+wh.sinks.hd.hdfs.rollCount = 100
+
+#Describe/configure the channels
+# use a channel which buffers events in memory
+wh.channels.mem.type = memory
+wh.channels.mem.capacity = 1000
+wh.channels.mem.transactionCapacity = 100
+
+#Bind the source and sink to the channel
+wh.sources.ws.channels = mem
+wh.sinks.hd.channel = mem
+
+------------------------------------------------------------------------------------------------------
+**********************************************KAFKA***************************************************
+------------------------------------------------------------------------------------------------------
+
+kafka-topics \
+	--create \
+	--zookeeper nn01.itversity.com:2181,nn02.itversity.com:2181,rm01.itversity.com:2181 \
+	--replication-factor 1 \
+	--partitions 1 \
+	--topic hadoop_bigdata_kafkademo
+	
+
+kafka-topics \
+	--list \
+	--zookeeper nn01.itversity.com:2181,nn02.itversity.com:2181,rm01.itversity.com:2181 \
+	--topic hadoop_bigdata_kafkademo
+	
+
+kafka-console-producer \
+	--broker-list wn01.itversity.com:6667,wn02.itversity.com:6667,wn03.itversity.com:6667,wn04.itversity.com:6667 \
+	--topic hadoop_bigdata_kafkademo
+	
+
+kafka-console-consumer \
+	--bootstrap-server wn01.itversity.com:6667,wn02.itversity.com:6667,wn03.itversity.com:6667,wn04.itversity.com:6667 \
+	--topic hadoop_bigdata_kafkademo \
+	--from-beginning
+
+	
+#kafka-console-consumer \
+#	--zookeeper nn01.itversity.com:2181,nn02.itversity.com:2181,rm01.itversity.com:2181 \
+#	--topic hadoop_bigdata_kafkademo \
+#	--from-beginning
+
+
+
+-------------------------------------------------------------------------
+#spark-streaming
+#/home/hadoop_bigdata/pythondemo/retail/src/main/python/StreamingWordCount.py
+
+from pyspark import SparkContext, SparkConf
+from pyspark.streaming import StreamingContext
+
+conf = SparkConf(). \
+		setAppName("Streaming Word Count"). \
+		setMaster("yarn-client")
+		
+sc = SparkContext(conf=conf)
+ssc = StreamingContext(sc, 15)
+
+lines = ssc.socketTextStream("gw02.itversity.com",19999)
+words = lines.flatMap(lambda line: line.split(" "))
+wordTuples = words.map(lambda word: (word,1))
+wordCount = wordTuples.reduceByKey(lambda x,y : x+y)
+
+wordCount.pprint()
+
+ssc.start()
+ssc.awaitTermination()
+
+#spark-submit --master yarn --conf "spark.ui.port=12890" /home/hadoop_bigdata/pythondemo/retail/src/main/python/StreamingWordCount.py
+#nc -lk gw02.itversity.com 19999
+----------------------------------------------------------------------
+
+#src/main/python/StreamingDepartmentCount.py
+
+from pyspark import SparkConf, SparkContext
+from pyspark.streaming import StreamingContext
+
+import sys
+
+hostname = sys.argv[1]
+port = int(sys.argv[2])
+outputPrefix = sys.argv[3]
+
+conf = SparkConf(). \
+		setAppName("Streaming Department Count")
+
+sc = SparkContext(conf=conf)
+ssc = StreamingContext(sc, 30)
+
+#168.184.110.94 - - [26/Jan/2018:20:35:54 -0800] "GET /department/footwear/products HTTP/1.1" 200 1197 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit7537.36 (KHTML, like Gecko) chrome/35.0.1916.153 safari/537.36
+
+messages = ssc.socketTextStream(hostname, port)
+departmentMessages = messages.filter(lambda msg: msg.split(" ")[6].split("/")[1] == "department")
+departmentNames = departmentMessages.map(lambda msg: (msg.split(" ")[6].split("/")[2], 1))
+
+from operator import add
+
+departmentCount = departmentNames.reduce(add)
+
+departmentCount.saveAsTextFiles(outputPrefix)
+ssc.start()
+ssc.awaitTermination()
+
+#tail_logs.sh | nc -lk gw02.itversity.com 19999
+#spark-submit --master yarn --conf "spark.ui.port = 12890" src/main/python/StreamingDepartmentCount.py gw02.itversity.com 19999 /user/hadoop_bigdata/streamingdeptcountpython/cnt
+
+------------------------------------------------------------------------
+#/home/hadoop_bigdata/flume_demo/strdeptcount/sdc.conf
+#name components
+sdc.sources = ws
+sdc.sinks = hd spark
+sdc.channels = hdmem sparkmem
+
+
+#Describe sources
+sdc.sources.ws.type = exec
+sdc.sources.ws.command = tail -F /opt/gen_logs/logs/access.log
+
+#Describe sinks
+sdc.sinks.hd.type = hdfs
+sdc.sinks.hd.hdfs.path = hdfs://nn01.itversity.com:8020/user/hadoop_bigdata/flume_demo
+sdc.sinks.hd.hdfs.fileType = DataStream
+sdc.sinks.hd.hdfs.filePrefix = FlumeDemo
+sdc.sinks.hd.hdfs.fileSuffix = .txt
+sdc.sinks.hd.hdfs.rollInterval = 120
+sdc.sinks.hd.hdfs.rollSize = 1048576
+sdc.sinks.hd.hdfs.rollCount = 100
+
+sdc.sinks.spark.type = org.apache.spark.streaming.flume.sink.SparkSink
+sdc.sinks.spark.hostname = gw02.itversity.com
+sdc.sinks.spark.port = 8123
+
+
+#Descrbe channels
+sdc.channels.hdmem.type = memory
+sdc.channels.hdmem.capacity = 1000
+sdc.channels.hdmem.trasactionCapacity = 100
+
+sdc.channels.sparkmem.type = memory
+sdc.channels.sparkmem.capacity = 1000
+sdc.channels.sparkmem.trasactionCapacity = 100
+
+#Bind all
+sdc.sources.ws.channels = hdmem sparkmem
+sdc.sinks.hd.channel = hdmem
+sdc.sinks.spark.channel = sparkmem
+
+
+#flume-ng agent -n sdc -f /home/hadoop_bigdata/flume_demo/strdeptcount/sdc.conf --conf /home/hadoop_bigdata/flume_demo/conf/
+
+-------------------------------------------------------------------------------------------------
+#/home/hadoop_bigdata/pythondemo/retailsrc/main/python/StreamingFlumeWordCount.py
+from pyspark import SparkContext, SparkConf
+from pyspark.streaming import StreamingContext
+from pyspark.streaming.flume import FlumeUtils
+
+import sys
+
+hostname = sys.argv[1]
+port = int(sys.argv[2])
+outputPrefix = sys.argv[3]
+
+
+conf = SparkConf().setAppName("Streaming Flume Word Count")
+sc = SparkContext(conf=conf)
+
+ssc = StreamingContext(sc, 30)
+
+addresses = [(hostname, port)]
+pollingFlumeStream = FlumeUtils.createPollingStream(ssc, addresses)
+
+messages = pollingFlumeStream.map(lambda x: x[1])
+departmentMessages = messages.filter(lambda msg: msg.split(" ")[6].split("/")[1] == "department")
+departmentNames = departmentMessages.map(lambda msg: (msg.split(" ")[6].split("/")[2], 1))
+
+from operator import add
+
+departmentCount = departmentNames.reduce(add)
+
+departmentCount.saveAsTextFiles(outputPrefix)
+
+ssc.start()
+ssc.awaitTermination()
+
+#spark-submit --master yarn --deploy-mode client --jars "/usr/hdp/2.5.0.0-1245/spark/lib/spark-streaming-flume_2.10-1.6.2.jar,/usr/hdp/2.5.0.0-1245/spark/lib/spark-streaming-flume-sink_2.10-1.6.2.jar,/usr/hdp/2.5.0.0-1245/flume/lib/spark-streaming-flume-sink_2.10-1.6.2.jar,/home/hadoop_bigdata/pythondemo/spark-streaming-flume-assembly_2.11-2.3.2.jar" --conf "spark.ui.port=12890" src/main/python/StreamingFlumeDepartmentCount.py gw02.itversity.com 8123 /user/hadoop_bigdata/streamingdeptcountpython/cnt1
+
+
+#note we needed to add /home/hadoop_bigdata/pythondemo/spark-streaming-flume-assembly_2.11-2.3.2.jara also because without it the spark was not successfull feching data from flume
+
+-----------------------------------------------------------------------------------
+
+#Name the components of this agent
+
+wk.sources = ws
+wk.sinks = kafka
+wk.channels = mem
+
+#Describe sources
+wk.sources.ws.type = exec
+wk.sources.ws.command = tail -F /opt/gen_logs/logs/access.log
+
+#Describe sinks
+wk.sinks.kafka.type = org.apache.flume.sink.kafka.KafkaSink
+wk.sinks.kafka.brokerList = wn01.itversity.com:6667,wn02.itversity.com:6667,wn03.itversity.com:6667,wn04.itversity.com:6667
+wk.sinks.kafka.topic = hadoop_bigdata_dept_str
+
+#Describe channels
+wk.channels.mem.type = memory
+wk.channels.mem.capacity = 1000
+wk.channels.mem.trasactionCapacity = 100
+
+
+
+#Bind all
+wk.sources.ws.channels = mem
+wk.sinks.kafka.channel = mem
+
+#flume-ng agent -n wk -f /home/hadoop_bigdata/flume_demo/wslogstokafka/wskafka.conf --conf /home/hadoop_bigdata/flume_demo/conf/
+
+----------------------------------------------------------------------------------------
+#/home/hadoop_bigdata/pythondemo/retail/src/main/python/StreamingKafkaDepartmentCount.py
+from pyspark import SparkContext, SparkConf
+from pyspark.streaming import StreamingContext
+from pyspark.streaming.kafka import KafkaUtils
+
+import sys
+
+outputPrefix = sys.argv[1]
+
+
+conf = SparkConf().setAppName("Streaming Kafka Word Count")
+sc = SparkContext(conf=conf)
+
+ssc = StreamingContext(sc, 30)
+
+topic = ["hadoop_bigdata_dept_str"]
+brokerList = {"metadata.broker.list": "wn01.itversity.com:6667,wn02.itversity.com:6667,wn03.itversity.com:6667,wn04.itversity.com:6667"}
+
+directKafkaStream = KafkaUtils.createDirectStream(ssc, topic, brokerList)
+
+messages = directKafkaStream.map(lambda x: x[1])
+departmentMessages = messages.filter(lambda msg: msg.split(" ")[6].split("/")[1] == "department")
+departmentNames = departmentMessages.map(lambda msg: (msg.split(" ")[6].split("/")[2], 1))
+
+from operator import add
+
+departmentCount = departmentNames.reduce(add)
+
+departmentCount.saveAsTextFiles(outputPrefix)
+
+ssc.start()
+ssc.awaitTermination()
+
+#spark-submit --master yarn --conf "spark.ui.port=12890" --jars "/usr/hdp/2.6.5.0-292/kafka/libs/kafka_2.11-1.0.0.2.6.5.0-292.jar,/usr/hdp/2.6.5.0-292/kafka/libs/spark-streaming-kafka_2.10-1.6.3.jar,/usr/hdp/2.6.5.0-292/kafka/libs/metrics-core-2.2.0.jar" src/main/python/StreamingKafkaDepartmentCount.py /user/hadoop_bigdata/streamingdeptcountpython/kafka_cnt
+
+
+#note below is the working spark-submit command 
+#spark-submit --master yarn --conf "spark.ui.port=12890" --jars "/home/hadoop_bigdata/pythondemo/kafka_2.11-0.8.2.2.3.5.4-5.jar"  src/main/python/StreamingKafkaDepartmentCount.py /user/hadoop_bigdata/streamingdeptcountpython/kafka_cnt
+
+
+
+
+
+
+
